@@ -1,4 +1,4 @@
-from xgboost_basic_tree import XGBoostBaseTree
+from model.ml_model.xgboost_basic_tree import *
 import utils as utils
 import copy
 import numpy as np

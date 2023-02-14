@@ -2,7 +2,7 @@
 xgboost基模型：回归树的实现
 """
 import numpy as np
-from wrapper_models import DataBinWrapper
+from model.ml_model.wrapper_models import *
 
 
 class XGBoostBaseTree(object):

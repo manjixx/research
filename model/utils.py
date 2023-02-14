@@ -40,7 +40,6 @@ def read_data(file_path, data_type, season, algorithm):
 
 
 def split_dataset(data, index, down, up, x_features, y_features):
-
     if index == "bmi" or index == "griffith":
         low_x = data[(data[index] <= down)][x_features]
         low_y = data[(data[index] <= down)][[y_features]]
@@ -77,7 +76,7 @@ def split_dataset(data, index, down, up, x_features, y_features):
         # 归一化
         x_list[i] = preprocessing.MaxAbsScaler().fit_transform(x)
 
-    return x_list,  y_list
+    return x_list, y_list
 
 
 def sign(x):
@@ -409,14 +408,19 @@ def plot_decision_function(X, y, clf, support_vectors=None):
     y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
     xx, yy = np.meshgrid(np.arange(x_min, x_max, plot_step),
                          np.arange(y_min, y_max, plot_step))
-
-    Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
+    temp = np.c_[xx.ravel(), yy.ravel()]
+    print(temp)
+    # Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = clf.predict(temp)
+    print(Z)
     Z = Z.reshape(xx.shape)
     plt.contourf(xx, yy, Z, alpha=0.4)
     plt.scatter(X[:, 0], X[:, 1], alpha=0.8, c=y, edgecolor='k')
     # 绘制支持向量
     if support_vectors is not None:
         plt.scatter(X[support_vectors, 0], X[support_vectors, 1], s=80, c='none', alpha=0.7, edgecolor='red')
+
+    plt.show()
 
 
 def plot_contourf(data, func, lines=3):
@@ -430,4 +434,13 @@ def plot_contourf(data, func, lines=3):
     C = plt.contour(X, Y, func(np.c_[X.reshape(-1), Y.reshape(-1)]).reshape(X.shape), lines, colors='g', linewidth=0.5)
     plt.clabel(C, inline=True, fontsize=10)
     plt.scatter(data[:, 0], data[:, 1])
+
+
+def cal_accuracy(y_pred, y_test):
+    count = 0
+    for i in range(0, len(y_pred)):
+        if y_pred[i] == y_test[i]:
+            count = count + 1
+
+    return count / len(y_pred)
 

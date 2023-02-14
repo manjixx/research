@@ -1,4 +1,4 @@
-from cart import CARTClassifier
+from model.ml_model.cart import *
 import copy
 import numpy as np
 

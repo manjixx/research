@@ -3,7 +3,7 @@ from analysis.utils import *
 if __name__ == "__main__":
 
     seasons = ['summer']
-    filepath = '../dataset/synthetic_step.csv'
+    filepath = '../dataset/synthetic.csv'
 
     for season in seasons:
         # 读取数据
@@ -28,8 +28,3 @@ if __name__ == "__main__":
 
         # 绘制整体冷热不适分布图
         plot_all(df, season)
-
-
-
-
-

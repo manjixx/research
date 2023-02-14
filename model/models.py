@@ -1,11 +1,42 @@
-from ml_model.knn import *
+from ml_model.pmv import *
 from ml_model.softsvm import *
+from ml_model.knn import *
 from ml_model.adaboost_classifier import *
 from ml_model.random_forest_classifier import *
 from ml_model.xgboost_classifier import *
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from utils import *
+
+
+def pmv(data, target):
+    """
+    该模型为pmv预测热舒适投票值模型
+    :param data: 训练数据特征集
+    :param target: label
+    :return:
+    """
+    # 初始化参数
+    m = 1.1
+    clo = 0.5
+    vel = 0.06
+
+    # 初始化存储列表
+    pmv_pred = []
+
+    for i in range(0, len(data)):
+        ta = data[i][0]
+        rh = data[i][1]
+        pmv_result = pmv_model(M=m * 58.15, clo=clo, tr=ta, ta=ta, vel=vel, rh=rh)
+        if pmv_result > 0.5:
+            pmv_pred.append(2)
+        elif pmv_result < -0.5:
+            pmv_pred.append(0)
+        else:
+            pmv_pred.append(1)
+
+    accuracy = utils.cal_accuracy(pmv_pred, target)
+    print("pmv模型预测精度为：" + str(accuracy))
 
 
 def svm(file_path, x_features, index, c):
@@ -58,38 +89,89 @@ def cart(data, target):
     utils.plot_decision_function(data, target, tree)
 
 
-def adaboost(data, target):
+def adaboost(x_train, y_train, x_test, y_test):
     # 同质
+    print("AdaBoost: 同质")
     classifier = AdaBoostClassifier(base_estimator=CARTClassifier(max_depth=2), n_estimators=10)
-    classifier.fit(data, target)
-    utils.plot_decision_function(data, target, classifier)
+    classifier.fit(x_train, y_train)
+    y_pred = classifier.predict(x_test)
+    count = 0
+    for i in range(0, len(y_pred)):
+        if y_pred[i] == y_test[i]:
+            count = count + 1
+    # 准确率
+    print("准确率")
+    print("测试集的准确率为：", count / len(y_pred))
+    # plot_decision_function(x_train, y_train, classifier)
 
     # 异质
-    classifier = AdaBoostClassifier(base_estimator=[LogisticRegression(), SVC(C=5.0, kernel='rbf'), CARTClassifier()])
-    classifier.fit(data, target)
-    utils.plot_decision_function(data, target, classifier)
+    print("AdaBoost: 异质")
+    classifier = AdaBoostClassifier(base_estimator=[LogisticRegression(), SVC(C=5.0, kernel='rbf', probability=True), CARTClassifier()])
+    classifier.fit(x_train, y_train)
+    y_pred = classifier.predict(x_test)
+    count = 0
+    for i in range(0, len(y_pred)):
+        if y_pred[i] == y_test[i]:
+            count = count + 1
+    # 准确率
+    print("准确率")
+    print("测试集的准确率为：", count / len(y_pred))
+    # utils.plot_decision_function(x_train, y_train, classifier)
 
     # 权重衰减
-    classifier = AdaBoostClassifier(base_estimator=[LogisticRegression(), SVC(C=5.0, kernel='rbf'), CARTClassifier()], learning_rate=0.5)
-    classifier.fit(data, target)
-    utils.plot_decision_function(data, target, classifier)
+    print("AdaBoost: 权重衰减")
+    classifier = AdaBoostClassifier(base_estimator=[LogisticRegression(), SVC(C=5.0, kernel='rbf', probability=True), CARTClassifier()], learning_rate=0.5)
+    classifier.fit(x_train, y_train)
+    y_pred = classifier.predict(x_test)
+    count = 0
+    for i in range(0, len(y_pred)):
+        if y_pred[i] == y_test[i]:
+            count = count + 1
+    # 准确率
+    print("准确率")
+    print("测试集的准确率为：", count / len(y_pred))
+    # utils.plot_decision_function(x_train, y_train, classifier)
 
 
-def random_forest(data, target):
+def random_forest(x_train, y_train, x_test, y_test):
     # 同质
     classifier = RandomForestClassifier(feature_sample=0.6)
-    classifier.fit(data, target)
-    utils.plot_decision_function(data, target, classifier)
+    classifier.fit(x_train, y_train)
+    y_pred = classifier.predict(x_test)
+    count = 0
+    for i in range(0, len(y_pred)):
+        if y_pred[i] == y_test[i]:
+            count = count + 1
+    # 准确率
+    print("准确率")
+    print("测试集的准确率为：", count / len(y_pred))
+    # utils.plot_decision_function(x_train, y_train, classifier)
 
     # 异质
     classifier = RandomForestClassifier(
-        base_estimator=[LogisticRegression(), SVC(C=5.0, kernel='rbf'), CARTClassifier(max_depth=2)],
+        base_estimator=[LogisticRegression(), SVC(C=5.0, kernel='rbf', probability=True), CARTClassifier(max_depth=2)],
         feature_sample=0.6)
-    classifier.fit(data, target)
-    utils.plot_decision_function(data, target, classifier)
+    classifier.fit(x_train, y_train)
+    # utils.plot_decision_function(x_train, y_train, classifier)
+    y_pred = classifier.predict(x_test)
+    count = 0
+    for i in range(0, len(y_pred)):
+        if y_pred[i] == y_test[i]:
+            count = count + 1
+    # 准确率
+    print("准确率")
+    print("测试集的准确率为：", count / len(y_pred))
 
 
-def xgboost(data, target):
+def xgboost(x_train, y_train, x_test, y_test):
     classifier = XGBoostClassifier()
-    classifier.fit(data, target)
-    utils.plot_decision_function(data, target, classifier)
+    classifier.fit(x_train, y_train)
+    # utils.plot_decision_function(x_train, y_train, classifier)
+    y_pred = classifier.predict(x_test)
+    count = 0
+    for i in range(0, len(y_pred)):
+        if y_pred[i] == y_test[i]:
+            count = count + 1
+    # 准确率
+    print("准确率")
+    print("测试集的准确率为：", count / len(y_pred))

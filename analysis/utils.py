@@ -141,9 +141,9 @@ def plot_all(data, season):
         cool = data[(data['pmv'] < -0.5)]
         normal = data[(data['pmv'] <= 0.5) & (data['pmv'] >= -0.5)]
     else:
-        hot = data[(data['thermal sensation'] > 0.5)]
-        cool = data[(data['thermal sensation'] < -0.5)]
-        normal = data[(data['thermal sensation'] <= 0.5) & (data['thermal sensation'] >= -0.5)]
+        hot = data[(data['pmv'] > 0.5)]
+        cool = data[(data['pmv'] < -0.5)]
+        normal = data[(data['pmv'] <= 0.5) & (data['pmv'] >= -0.5)]
 
     print("There are " + str(hot.shape[0]) + " pieces of hot complain in " + season + " dataset")
     print("There are " + str(cool.shape[0]) + " pieces of cool complain in " + season + " dataset")

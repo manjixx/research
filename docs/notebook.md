@@ -74,6 +74,17 @@
   - Random Forest 
   - Xgboost
 
+## 三、工作计划
+
+> 2022-02-14
+
+- 搭建`pmv`模型，计算`baseline`
+- 修改`svm`与`knn`算法接口，传入参数`x_train,y_train,x_test,y_test,c_weights`
+- 针对`adaboost`算法，传入训练数据的同时，自己初始化`sample_weights`并传递给模型
+- 针对`randomForest`算法，根据分类标准不同初始化`feature_sample`传递给模型
+
+
+
 ## 六、Kernel Naive Bayes/NB
 
 [分类算法之朴素贝叶斯 (Naive Bayes)](https://blog.csdn.net/ex_6450/article/details/126142846?spm=1001.2101.3001.6661.1&utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-126142846-blog-125782329.pc_relevant_multi_platform_whitelistv3&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-126142846-blog-125782329.pc_relevant_multi_platform_whitelistv3&utm_relevant_index=1)
