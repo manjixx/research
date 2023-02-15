@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def soft_svm(c, x_train, y_train, x_test, y_test):
+def soft_svm(x_train, y_train, x_test, y_test, C):
     ker = ['linear', 'poly']
     for k in ker:
         print("核心函数为：" + k)
-        model = SVC(kernel=k, decision_function_shape='ovr', C=c).fit(x_train, y_train)
+        model = SVC(kernel=k, decision_function_shape='ovr', C=C).fit(x_train, y_train)
         y_pred = model.predict(x_test)
 
         # 准确率
@@ -19,24 +19,36 @@ def soft_svm(c, x_train, y_train, x_test, y_test):
 
         # 精确率
         print("精确率")
+        print("macro: ", end='')
         print(precision_score(y_test, y_pred, average='macro'))
+        print("micro: ", end='')
         print(precision_score(y_test, y_pred, average='micro'))
+        print("weighted: ", end='')
         print(precision_score(y_test, y_pred, average='weighted'))
+        print("None: ", end='')
         print(precision_score(y_test, y_pred, average=None))
 
         # 召回率
         print("回召率")
-        print(recall_score(y_test, y_pred, average='macro'))  # 0.3333333333333333
+        print("macro: ", end='')
+        print(recall_score(y_test, y_pred, average='macro'))
+        print("micro: ", end='')
         print(recall_score(y_test, y_pred, average='micro'))  # 0.3333333333333333
+        print("weighted: ", end='')
         print(recall_score(y_test, y_pred, average='weighted'))  # 0.3333333333333333
+        print("None: ", end='')
         print(recall_score(y_test, y_pred, average=None))  # [1. 0. 0.]
 
         # P-R曲线
         # F1 score
         print("F1 score")
+        print("macro: ", end='')
         print(f1_score(y_test, y_pred, average='macro'))  # 0.26666666666666666
+        print("micro: ", end='')
         print(f1_score(y_test, y_pred, average='micro'))  # 0.3333333333333333
+        print("weighted: ", end='')
         print(f1_score(y_test, y_pred, average='weighted'))  # 0.26666666666666666
+        print("None: ", end='')
         print(f1_score(y_test, y_pred, average=None))  # [0.8 0.  0. ]
 
         plot_svm(model, x_train, y_train)

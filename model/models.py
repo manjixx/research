@@ -39,17 +39,22 @@ def pmv(data, target):
     print("pmv模型预测精度为：" + str(accuracy))
 
 
-def svm(file_path, x_features, index, c):
-    df = read_data(file_path=file_path, data_type='filed', season="summer", algorithm='svm')
-    x_list, y_list = split_dataset(df, index, down=18, up=24, x_features=x_features, y_features='thermal sensation')
-    c = c
-    for i in range(0, len(x_list)):
-        x = x_list[i]
-        y = y_list[i]
+def svm(data, target, C):
+    for i in range(0, len(data)):
+        x = data[i]
+        y = target[i]
+        c = C[i]
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=35, stratify=y)
-        print("分类指标为" + index + "的第" + str(i) + "层级的预测结果，" + '权重为：' + str(c[i]))
-        soft_svm(c[i], x_train, y_train, x_test, y_test)
-        print('**************************')
+        print('权重为：' + str(c))
+        soft_svm(c, x_train, y_train, x_test, y_test)
+
+
+
+
+
+
+def knn(data, target, weights):
+
 
 
 def knn_model(file_path, x_features, w, neighbours):

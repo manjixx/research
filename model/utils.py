@@ -39,11 +39,18 @@ def read_data(file_path, data_type, season, algorithm):
     return data
 
 
-def split_dataset(data, index, down, up, x_features, y_features):
-    if index == "bmi" or index == "griffith":
-        low_x = data[(data[index] <= down)][x_features]
-        low_y = data[(data[index] <= down)][[y_features]]
-        mid_x = data[(data[index] < up) & (data[index] > down)][x_features]
+def split(data, target, index):
+    if index == "bmi":
+        low_x = data[(data[index] <= 18)]
+        low_y = target[(target[index] <= 18)]
+        mid_x = target[(target[index] < 24) & (data[index] > 18)]
+        mid_y = data[(data[index] < 24) & (data[index] > 18)]
+        high_x = data[(data[index] >= 24)]
+        high_y = data[(data[index] >= 24)]
+    elif index == "griffith":
+        low_x = data[(data[index] <= down)]
+        low_y = data[(data[index] <= down)]
+        mid_x = data[(data[index] < up) & (data[index] > down)]
         mid_y = data[(data[index] < up) & (data[index] > down)][[y_features]]
         high_x = data[(data[index] >= up)][x_features]
         high_y = data[(data[index] >= up)][[y_features]]
