@@ -1,11 +1,14 @@
 from ml_model.pmv import *
 from ml_model.softsvm import *
 from ml_model.knn import *
-from ml_model.adaboost_classifier import *
-from ml_model.random_forest_classifier import *
-from ml_model.xgboost_classifier import *
-from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import cross_val_score
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
+from lightgbm.sklearn import LGBMClassifier
 from utils import *
 
 
@@ -35,148 +38,142 @@ def pmv(data, target):
         else:
             pmv_pred.append(1)
 
-    accuracy = utils.cal_accuracy(pmv_pred, target)
+    accuracy = accuracy_score(pmv_pred, target)
+
     print("pmv模型预测精度为：" + str(accuracy))
 
 
-def svm(data, target, C):
-    for i in range(0, len(data)):
-        x = data[i]
-        y = target[i]
-        c = C[i]
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=35, stratify=y)
-        print('权重为：' + str(c))
-        soft_svm(c, x_train, y_train, x_test, y_test)
+def svm(x_train, y_train, x_test, y_test, kernel, C):
+    for i in range(0, len(C)):
+        print('权重为：' + str(C[i]))
+        for k in kernel:
+            print("核函数为：" + kernel)
+            soft_svm(x_train[i], y_train[i], x_test[i], y_test[i], k, C[i])
 
 
+def knn(x_train, y_train, x_test, y_test, weights, distance, neighbor):
+    model = KNN(x_train, y_train)
+    model.neighbors = neighbor
+    for i in range(0, len(x_test)):
+        print("开始第"+str(i)+"轮训练")
+        for d in distance:
+            print("距离函数为" + d)
+            model.distance = d
+            y_pre = model.predict(x_test[i], weights[i])
+            accuracy, precision, recall, f1 = evaluating_indicator(y_pre, y_test)
+            knn_plot(model, x_test[i], y_test[i], weights[i])
 
 
+def cross_val(x_train, y_train, neighbour):
+    scores = []
+    ks = []
+    for k in range(3, neighbour, 2):
+        model = KNeighborsClassifier(n_neighbors=k)
+        score = cross_val_score(model, x_train, y_train, cv=6).mean()
+        scores.append(score)
+        ks.append(k)
+    # 画图，x轴为k值，y值为误差值
+    plt.plot(ks, scores)
+    plt.xlabel('Value of K in KNN')
+    plt.ylabel('scores')
+    plt.show()
 
 
-def knn(data, target, weights):
-
-
-
-def knn_model(file_path, x_features, w, neighbours):
-    data = read_data(file_path=file_path, data_type='filed', season="summer", algorithm='knn')
-    x_list, y_list = split_dataset(data, 'griffith', down=0.8, up=1.2, x_features=x_features,
-                                   y_features='thermal sensation')
-
-    x_train_list, y_train_list, x_test_list, y_test_list = split_filed_data(x_list, y_list, w, testsize=0.2)
-
-    size = len(x_train_list[0]) + len(x_train_list[1]) + len(x_train_list[2])
-
-    print("原始数据集中有" + str(size) + "条数据")
-    pmv_data = read_data('../dataset/synthetic.csv', data_type='pmv', season="summer", algorithm='knn')
-    print("生成数据集中共有" + str(pmv_data.shape[0]) + "条数据！")
-    x_train_pmv, y_train_pmv = split_pmv_data(pmv_data, 2000 - size)
-
-    x_train, y_train = train_data_knn(x_train_pmv, y_train_pmv, x_train_list, y_train_list)
-
-    result = knn(x_train, y_train, x_test_list, y_test_list, neighbours)
-    print(result)
-
-
-def cart(data, target):
-    # 造伪数据
-    from sklearn.datasets import make_classification
-    data, target = make_classification(n_samples=100, n_features=2, n_classes=2, n_informative=1, n_redundant=0,
-                                       n_repeated=0, n_clusters_per_class=1, class_sep=.5, random_state=21)
-    # 训练并查看效果
-    tree = CARTClassifier()
-    tree.fit(data, target)
-    # utils.plot_decision_function(data, target, tree)
-
-    # 一样的，如果不加以限制，同样会存在过拟合现象，所以可以剪枝...
-
-    # 剪枝
-    tree.prune(5)
-    utils.plot_decision_function(data, target, tree)
-
-
-def adaboost(x_train, y_train, x_test, y_test):
+def adaboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_test):
     # 同质
     print("AdaBoost: 同质")
-    classifier = AdaBoostClassifier(base_estimator=CARTClassifier(max_depth=2), n_estimators=10)
-    classifier.fit(x_train, y_train)
+    classifier = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=2), n_estimators=10)
+    classifier.fit(x_train, y_train, sample_weights)
     y_pred = classifier.predict(x_test)
-    count = 0
-    for i in range(0, len(y_pred)):
-        if y_pred[i] == y_test[i]:
-            count = count + 1
-    # 准确率
-    print("准确率")
-    print("测试集的准确率为：", count / len(y_pred))
-    # plot_decision_function(x_train, y_train, classifier)
+    print("不带权重的测试集准确率为：" + classifier.score(x_test, y_test))
+    print("带权重的测试集准确率为：" + classifier.score(x_test, y_test, sample_weights_test))
+    evaluating_indicator(y_pred, y_test)
+    # utils.plot_decision_function(x_train, y_train, classifier)
 
     # 异质
     print("AdaBoost: 异质")
-    classifier = AdaBoostClassifier(base_estimator=[LogisticRegression(), SVC(C=5.0, kernel='rbf', probability=True), CARTClassifier()])
-    classifier.fit(x_train, y_train)
+    classifier = AdaBoostClassifier(
+        base_estimator=[
+            DecisionTreeClassifier(max_depth=2),
+            LogisticRegression(),
+            SVC(C=5.0, kernel='rbf', probability=True)],
+        n_estimators=10,
+        learning_rate=1
+    )
+    classifier.fit(x_train, y_train, sample_weights)
     y_pred = classifier.predict(x_test)
-    count = 0
-    for i in range(0, len(y_pred)):
-        if y_pred[i] == y_test[i]:
-            count = count + 1
-    # 准确率
-    print("准确率")
-    print("测试集的准确率为：", count / len(y_pred))
+    print("不带权重的测试集准确率为：" + classifier.score(x_test, y_test))
+    print("带权重的测试集准确率为：" + classifier.score(x_test, y_test, sample_weights_test))
+    evaluating_indicator(y_pred, y_test)
+
     # utils.plot_decision_function(x_train, y_train, classifier)
 
     # 权重衰减
     print("AdaBoost: 权重衰减")
-    classifier = AdaBoostClassifier(base_estimator=[LogisticRegression(), SVC(C=5.0, kernel='rbf', probability=True), CARTClassifier()], learning_rate=0.5)
-    classifier.fit(x_train, y_train)
+    classifier = AdaBoostClassifier(
+        base_estimator=[
+            DecisionTreeClassifier(max_depth=2),
+            LogisticRegression(),
+            SVC(C=5.0, kernel='rbf', probability=True)],
+        n_estimators=10,
+        learning_rate=0.5
+    )
+    classifier.fit(x_train, y_train, sample_weights,sample_weights_test)
     y_pred = classifier.predict(x_test)
-    count = 0
-    for i in range(0, len(y_pred)):
-        if y_pred[i] == y_test[i]:
-            count = count + 1
-    # 准确率
-    print("准确率")
-    print("测试集的准确率为：", count / len(y_pred))
+    print("不带权重的测试集准确率为：" + classifier.score(x_test, y_test))
+    print("带权重的测试集准确率为：" + classifier.score(x_test, y_test, sample_weights_test))
+    evaluating_indicator(y_pred, y_test)
     # utils.plot_decision_function(x_train, y_train, classifier)
 
 
-def random_forest(x_train, y_train, x_test, y_test):
+def random_forest(x_train, y_train, x_test, y_test, sample_weights, sample_weights_test):
     # 同质
-    classifier = RandomForestClassifier(feature_sample=0.6)
-    classifier.fit(x_train, y_train)
+    classifier = RandomForestClassifier(
+        base_estimator_=DecisionTreeClassifier(max_depth=2)
+    )
+    classifier.fit(x_train, y_train, sample_weights)
     y_pred = classifier.predict(x_test)
-    count = 0
-    for i in range(0, len(y_pred)):
-        if y_pred[i] == y_test[i]:
-            count = count + 1
-    # 准确率
-    print("准确率")
-    print("测试集的准确率为：", count / len(y_pred))
+    print("不带权重的测试集准确率为：" + classifier.score(x_test, y_test))
+    print("带权重的测试集准确率为：" + classifier.score(x_test, y_test, sample_weights_test))
+    evaluating_indicator(y_pred, y_test)
     # utils.plot_decision_function(x_train, y_train, classifier)
 
     # 异质
     classifier = RandomForestClassifier(
-        base_estimator=[LogisticRegression(), SVC(C=5.0, kernel='rbf', probability=True), CARTClassifier(max_depth=2)],
-        feature_sample=0.6)
+        base_estimator=[
+            DecisionTreeClassifier(max_depth=2),
+            LogisticRegression(),
+            SVC(C=5.0, kernel='rbf', probability=True)],
+        class_weight={0: 1, 1: 1.2, 2: 1}
+    )
     classifier.fit(x_train, y_train)
-    # utils.plot_decision_function(x_train, y_train, classifier)
     y_pred = classifier.predict(x_test)
-    count = 0
-    for i in range(0, len(y_pred)):
-        if y_pred[i] == y_test[i]:
-            count = count + 1
-    # 准确率
-    print("准确率")
-    print("测试集的准确率为：", count / len(y_pred))
+    print("不带权重的测试集准确率为：" + classifier.score(x_test, y_test))
+    print("带权重的测试集准确率为：" + classifier.score(x_test, y_test, sample_weights_test))
+    evaluating_indicator(y_pred, y_test)
+    # utils.plot_decision_function(x_train, y_train, classifier)
 
 
-def xgboost(x_train, y_train, x_test, y_test):
-    classifier = XGBoostClassifier()
-    classifier.fit(x_train, y_train)
+def xgboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_test):
+    category = [23, 25, 27, 28]  ##30_改
+    print(f'training_{k}_fold')
+    classifier = LGBMClassifier(
+        learning_rate=0.0075,
+        max_depth=7,
+        n_estimators=2048,
+        num_leaves=63,
+        random_state=2019,
+        n_jobs=-1,
+        reg_alpha=0.8,
+        reg_lambda=0.8,
+        subsample=0.2,
+        colsample_bytree=0.5,
+        class_weight={0: 1, 1: 1.2, 2: 1}
+    )
+    # classifier.fit(train_x, train_y, categorical_feature=category)
+    classifier.fit(x_test, y_test, sample_weights)
+    y_pred = classifier.predict(x_train)
+    print("不带权重的测试集准确率为：" + classifier.score(x_test, y_test))
+    print("带权重的测试集准确率为：" + classifier.score(x_test, y_test, sample_weights_test))
+    evaluating_indicator(y_pred, y_test)
     # utils.plot_decision_function(x_train, y_train, classifier)
-    y_pred = classifier.predict(x_test)
-    count = 0
-    for i in range(0, len(y_pred)):
-        if y_pred[i] == y_test[i]:
-            count = count + 1
-    # 准确率
-    print("准确率")
-    print("测试集的准确率为：", count / len(y_pred))

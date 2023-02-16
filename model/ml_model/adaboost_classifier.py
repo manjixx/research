@@ -32,9 +32,9 @@ class AdaBoostClassifier(object):
         # 记录estimator权重
         self.estimator_weights = []
 
-    def fit(self, x, y):
+    def fit(self, x, y, sample_weights):
         n_sample = x.shape[0]
-        sample_weights = np.asarray([1.0] * n_sample)
+        # sample_weights = np.asarray([1.0] * n_sample)
         for index in range(0, self.n_estimators):
             self.base_estimator[index].fit(x, y, sample_weight=sample_weights)
 

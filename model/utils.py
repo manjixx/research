@@ -5,6 +5,8 @@ from scipy import special
 from sklearn import preprocessing
 import math
 import matplotlib.pyplot as plt
+from sklearn.metrics import *
+from matplotlib.colors import ListedColormap
 
 
 def read_data(file_path, data_type, season, algorithm):
@@ -40,28 +42,28 @@ def read_data(file_path, data_type, season, algorithm):
 
 
 def split(data, target, index):
-    if index == "bmi":
+    if index == 'bmi':
         low_x = data[(data[index] <= 18)]
         low_y = target[(target[index] <= 18)]
         mid_x = target[(target[index] < 24) & (data[index] > 18)]
         mid_y = data[(data[index] < 24) & (data[index] > 18)]
         high_x = data[(data[index] >= 24)]
         high_y = data[(data[index] >= 24)]
-    elif index == "griffith":
+    elif index == 'griffith':
         low_x = data[(data[index] <= down)]
         low_y = data[(data[index] <= down)]
         mid_x = data[(data[index] < up) & (data[index] > down)]
         mid_y = data[(data[index] < up) & (data[index] > down)][[y_features]]
         high_x = data[(data[index] >= up)][x_features]
         high_y = data[(data[index] >= up)][[y_features]]
-    elif index == "preference":
+    elif index == 'preference':
         low_x = data[(data[index] == -1)][x_features]
         low_y = data[(data[index] == -1)][[y_features]]
         mid_x = data[(data[index] == 0)][x_features]
         mid_y = data[(data[index] == 0)][[y_features]]
         high_x = data[(data[index] == 1)][x_features]
         high_y = data[(data[index] == 1)][[y_features]]
-    elif index == "sensitivity":
+    elif index == 'sensitivity':
         low_x = data[(data[index] == 0)][x_features]
         low_y = data[(data[index] == 0)][[y_features]]
         mid_x = data[(data[index] == 1)][x_features]
@@ -443,11 +445,63 @@ def plot_contourf(data, func, lines=3):
     plt.scatter(data[:, 0], data[:, 1])
 
 
-def cal_accuracy(y_pred, y_test):
-    count = 0
-    for i in range(0, len(y_pred)):
-        if y_pred[i] == y_test[i]:
-            count = count + 1
+def evaluating_indicator(y_pre, y_test):
+    accuracy = {}
+    precision = {}
+    recall = {}
+    f1 = {}
+    # 准确率
+    accuracy.update('训练集准确率：', accuracy_score(y_test, y_pre))
 
-    return count / len(y_pred)
+    # 精确率
+    precision.update('精确率-macro：', precision_score(y_test, y_pre, average='macro'))
+    precision.update('精确率-micro：', precision_score(y_test, y_pre, average='micro'))
+    precision.update('精确率-weighted：', precision_score(y_test, y_pre, average='weighted'))
+    precision.update('精确率-None：', precision_score(y_test, y_pre, average='None'))
+
+    # 召回率
+    recall.update('召回率-macro：', recall_score(y_test, y_pre, average='macro'))
+    recall.update('召回率-micro：', recall_score(y_test, y_pre, average='micro'))
+    recall.update('召回率-weighted：', recall_score(y_test, y_pre, average='weighted'))
+    recall.update('召回率-None：', recall_score(y_test, y_pre, average='None'))
+
+    # F1 score
+    f1.update('F1 score-macro：', f1_score(y_test, y_pre, average='macro'))
+    f1.update('F1 score-micro：', f1_score(y_test, y_pre, average='micro'))
+    f1.update('F1 score-weighted：', f1_score(y_test, y_pre, average='weighted'))
+    f1.update('F1 score-None：', f1_score(y_test, y_pre, average='None'))
+
+    for kv in accuracy.items():
+        print(kv)
+    for kv in precision.items():
+        print(kv)
+    for kv in recall.items():
+        print(kv)
+    for kv in f1.items():
+        print(kv)
+
+    return accuracy, precision, recall, f1
+
+
+def knn_plot(model, x_test, y_test, weight):
+    h = .02
+    # 创建色彩图
+    cmap_light = ListedColormap(['orange', 'cyan', 'cornflowerblue'])
+    cmap_bold = ListedColormap(['darkorange', 'c', 'darkblue'])
+    # 绘制决策边界
+    x_min, x_max = x_test[:, -2].min() - 1, x_test[:, -2].max() + 1
+    y_min, y_max = x_test[:, -1].min() - 1, x_test[:, -1].max() + 1
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
+                         np.arange(y_min, y_max, h))
+
+    Z = model.predict(np.c_[xx.ravel(), yy.ravel()], weight).reshape(xx.shape)
+    plt.figure()
+    plt.pcolormesh(xx, yy, Z, cmap=cmap_light)
+
+    # 绘制训练点
+    plt.scatter(x_test[:, -2], x_test[:, -1], c=y_test, cmap=cmap_bold, edgecolor='k', s=20)
+    plt.xlim(xx.min(), xx.max())
+    plt.ylim(yy.min(), yy.max())
+    plt.show()
+
 
