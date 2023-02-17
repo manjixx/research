@@ -1,9 +1,8 @@
 from ml_model.pmv import *
 from ml_model.softsvm import *
-from ml_model.knn import *
+from ml_model.distance import *
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import cross_val_score
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
@@ -51,32 +50,38 @@ def svm(x_train, y_train, x_test, y_test, kernel, C):
             soft_svm(x_train[i], y_train[i], x_test[i], y_test[i], k, C[i])
 
 
-def knn(x_train, y_train, x_test, y_test, weights, distance, neighbor):
-    model = KNN(x_train, y_train)
-    model.neighbors = neighbor
+def knn(x_train, y_train, x_test, y_test, weights, distance):
     for i in range(0, len(x_test)):
         print("开始第"+str(i)+"轮训练")
         for d in distance:
-            print("距离函数为" + d)
-            model.distance = d
-            y_pre = model.predict(x_test[i], weights[i])
-            accuracy, precision, recall, f1 = evaluating_indicator(y_pre, y_test)
-            knn_plot(model, x_test[i], y_test[i], weights[i])
+            distance = Distance(weights[i])
+            model = KNeighborsClassifier(
+                n_neighbors=5,
+                weights='uniform',
+                algorithm='',
+                leaf_size='30',
+                p=2,
+                metric=getattr(distance, d),
+                metric_params=None,
+                n_jobs=None
+            )
+            model.fit(x_train, y_train)
+            y_pre = model.predict(x_test[i])
+            accuracy, precision, recall, f1 = evaluating_indicator(y_pre, y_test[i])
+            plot_decision_function(x_test[i], y_test[i], model)
 
 
-def cross_val(x_train, y_train, neighbour):
-    scores = []
-    ks = []
-    for k in range(3, neighbour, 2):
-        model = KNeighborsClassifier(n_neighbors=k)
-        score = cross_val_score(model, x_train, y_train, cv=6).mean()
-        scores.append(score)
-        ks.append(k)
-    # 画图，x轴为k值，y值为误差值
-    plt.plot(ks, scores)
-    plt.xlabel('Value of K in KNN')
-    plt.ylabel('scores')
-    plt.show()
+# def knn(x_train, y_train, x_test, y_test, weights, distance, neighbor):
+#     model = KNN(x_train, y_train)
+#     model.neighbors = neighbor
+#     for i in range(0, len(x_test)):
+#         print("开始第"+str(i)+"轮训练")
+#         for d in distance:
+#             print("距离函数为" + d)
+#             model.distance = d
+#             y_pre = model.predict(x_test[i], weights[i])
+#             accuracy, precision, recall, f1 = evaluating_indicator(y_pre, y_test)
+#             knn_plot(model, x_test[i], y_test[i], weights[i])
 
 
 def adaboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_test):
@@ -118,7 +123,7 @@ def adaboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_te
         n_estimators=10,
         learning_rate=0.5
     )
-    classifier.fit(x_train, y_train, sample_weights,sample_weights_test)
+    classifier.fit(x_train, y_train, sample_weights, sample_weights_test)
     y_pred = classifier.predict(x_test)
     print("不带权重的测试集准确率为：" + classifier.score(x_test, y_test))
     print("带权重的测试集准确率为：" + classifier.score(x_test, y_test, sample_weights_test))
@@ -156,7 +161,6 @@ def random_forest(x_train, y_train, x_test, y_test, sample_weights, sample_weigh
 
 def xgboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_test):
     category = [23, 25, 27, 28]  ##30_改
-    print(f'training_{k}_fold')
     classifier = LGBMClassifier(
         learning_rate=0.0075,
         max_depth=7,

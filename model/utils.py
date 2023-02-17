@@ -413,22 +413,44 @@ def plot_decision_function(X, y, clf, support_vectors=None):
     绘制决策边界
     """
     plot_step = 0.02
+    # 创建色彩图
+    cmap_light = ListedColormap(['orange', 'cyan', 'cornflowerblue'])
+    cmap_bold = ListedColormap(['darkorange', 'c', 'darkblue'])
     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
     y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
     xx, yy = np.meshgrid(np.arange(x_min, x_max, plot_step),
                          np.arange(y_min, y_max, plot_step))
-    temp = np.c_[xx.ravel(), yy.ravel()]
-    print(temp)
-    # Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
-    Z = clf.predict(temp)
-    print(Z)
-    Z = Z.reshape(xx.shape)
-    plt.contourf(xx, yy, Z, alpha=0.4)
-    plt.scatter(X[:, 0], X[:, 1], alpha=0.8, c=y, edgecolor='k')
+    Z = clf.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
+    plt.contourf(xx, yy, Z, alpha=0.4, cmap=cmap_light)
+    plt.scatter(X[:, 0], X[:, 1], alpha=0.8, c=y, cmap=cmap_bold, edgecolor='k', s=20)
+    plt.xlim(xx.min(), xx.max())
+    plt.ylim(yy.min(), yy.max())
     # 绘制支持向量
     if support_vectors is not None:
         plt.scatter(X[support_vectors, 0], X[support_vectors, 1], s=80, c='none', alpha=0.7, edgecolor='red')
 
+    plt.show()
+
+
+def knn_plot(model, x_test, y_test):
+    h = .02
+    # 创建色彩图
+    cmap_light = ListedColormap(['orange', 'cyan', 'cornflowerblue'])
+    cmap_bold = ListedColormap(['darkorange', 'c', 'darkblue'])
+    # 绘制决策边界
+    x_min, x_max = x_test[:, -2].min() - 1, x_test[:, -2].max() + 1
+    y_min, y_max = x_test[:, -1].min() - 1, x_test[:, -1].max() + 1
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
+                         np.arange(y_min, y_max, h))
+
+    Z = model.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
+    plt.figure()
+    plt.pcolormesh(xx, yy, Z, cmap=cmap_light)
+
+    # 绘制训练点
+    plt.scatter(x_test[:, -2], x_test[:, -1], c=y_test, cmap=cmap_bold, edgecolor='k', s=20)
+    plt.xlim(xx.min(), xx.max())
+    plt.ylim(yy.min(), yy.max())
     plt.show()
 
 
@@ -483,7 +505,7 @@ def evaluating_indicator(y_pre, y_test):
     return accuracy, precision, recall, f1
 
 
-def knn_plot(model, x_test, y_test, weight):
+def knn_plot(model, x_test, y_test):
     h = .02
     # 创建色彩图
     cmap_light = ListedColormap(['orange', 'cyan', 'cornflowerblue'])
@@ -494,7 +516,7 @@ def knn_plot(model, x_test, y_test, weight):
     xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
                          np.arange(y_min, y_max, h))
 
-    Z = model.predict(np.c_[xx.ravel(), yy.ravel()], weight).reshape(xx.shape)
+    Z = model.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
     plt.figure()
     plt.pcolormesh(xx, yy, Z, cmap=cmap_light)
 
