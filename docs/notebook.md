@@ -83,6 +83,10 @@
 - 针对`adaboost`算法，传入训练数据的同时，自己初始化`sample_weights`并传递给模型
 - 针对`randomForest`算法，根据分类标准不同初始化`feature_sample`传递给模型
 
+> 2022-02-17
+
+- 将`knn`模型用`sklearn`实现
+
 
 
 ## 六、Kernel Naive Bayes/NB
