@@ -25,28 +25,44 @@ def pmv(data, target):
 
     # 初始化存储列表
     pmv_pred = []
+    pmv_pred_level = []
 
     for i in range(0, len(data)):
         ta = data[i][0]
         rh = data[i][1]
         pmv_result = pmv_model(M=m * 58.15, clo=clo, tr=ta, ta=ta, vel=vel, rh=rh)
+        pmv_pred.append(round(pmv_result, 2))
+
         if pmv_result > 0.5:
-            pmv_pred.append(2)
+            pmv_pred_level.append(2)
         elif pmv_result < -0.5:
-            pmv_pred.append(0)
+            pmv_pred_level.append(0)
         else:
-            pmv_pred.append(1)
+            pmv_pred_level.append(1)
+    print("pmv模型预测精度为：", end='')
+    count = 0
+    for i in range(0, len(target)):
+        if pmv_pred[i] == target[i]:
+            count = count + 1
+    print(count/len(target))
 
-    accuracy = accuracy_score(pmv_pred, target)
-
-    print("pmv模型预测精度为：" + str(accuracy))
+    for i in range(0, len(target)):
+        if target[i] > 0.5:
+            target[i] = 2
+        elif target[i] < -0.5:
+            target[i] = 0
+        else:
+            target[i] = 1
+    print("pmv模型类别精度为：", end='')
+    accuracy = accuracy_score(pmv_pred_level, target)
+    print(accuracy)
 
 
 def svm(x_train, y_train, x_test, y_test, kernel, C):
     for i in range(0, len(C)):
-        print('权重为：' + str(C[i]))
         for k in kernel:
-            print("核函数为：" + kernel)
+            print(f'第{i + 1}类：', end='')
+            print("核函数为：" + k)
             soft_svm(x_train[i], y_train[i], x_test[i], y_test[i], k, C[i])
 
 
@@ -58,13 +74,15 @@ def knn(x_train, y_train, x_test, y_test, weights, distance):
             model = KNeighborsClassifier(
                 n_neighbors=5,
                 weights='uniform',
-                algorithm='',
+                algorithm='auto',
                 leaf_size='30',
                 p=2,
                 metric=getattr(distance, d),
                 metric_params=None,
                 n_jobs=None
             )
+            print(type(x_train[0][0]))
+            print(type(x_train[0][1]))
             model.fit(x_train, y_train)
             y_pre = model.predict(x_test[i])
             accuracy, precision, recall, f1 = evaluating_indicator(y_pre, y_test[i])
@@ -90,8 +108,10 @@ def adaboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_te
     classifier = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=2), n_estimators=10)
     classifier.fit(x_train, y_train, sample_weights)
     y_pred = classifier.predict(x_test)
-    print("不带权重的测试集准确率为：" + classifier.score(x_test, y_test))
-    print("带权重的测试集准确率为：" + classifier.score(x_test, y_test, sample_weights_test))
+    print("不带权重的测试集准确率为：", end='')
+    print(classifier.score(x_test, y_test))
+    print("带权重的测试集准确率为：", end='')
+    print(classifier.score(x_test, y_test, sample_weights_test))
     evaluating_indicator(y_pred, y_test)
     # utils.plot_decision_function(x_train, y_train, classifier)
 
@@ -107,8 +127,10 @@ def adaboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_te
     )
     classifier.fit(x_train, y_train, sample_weights)
     y_pred = classifier.predict(x_test)
-    print("不带权重的测试集准确率为：" + classifier.score(x_test, y_test))
-    print("带权重的测试集准确率为：" + classifier.score(x_test, y_test, sample_weights_test))
+    print("不带权重的测试集准确率为：", end='')
+    print(classifier.score(x_test, y_test))
+    print("带权重的测试集准确率为：", end='')
+    print(classifier.score(x_test, y_test, sample_weights_test))
     evaluating_indicator(y_pred, y_test)
 
     # utils.plot_decision_function(x_train, y_train, classifier)
@@ -125,8 +147,10 @@ def adaboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_te
     )
     classifier.fit(x_train, y_train, sample_weights, sample_weights_test)
     y_pred = classifier.predict(x_test)
-    print("不带权重的测试集准确率为：" + classifier.score(x_test, y_test))
-    print("带权重的测试集准确率为：" + classifier.score(x_test, y_test, sample_weights_test))
+    print("不带权重的测试集准确率为：", end='')
+    print(classifier.score(x_test, y_test))
+    print("带权重的测试集准确率为：", end='')
+    print(classifier.score(x_test, y_test, sample_weights_test))
     evaluating_indicator(y_pred, y_test)
     # utils.plot_decision_function(x_train, y_train, classifier)
 
@@ -138,8 +162,10 @@ def random_forest(x_train, y_train, x_test, y_test, sample_weights, sample_weigh
     )
     classifier.fit(x_train, y_train, sample_weights)
     y_pred = classifier.predict(x_test)
-    print("不带权重的测试集准确率为：" + classifier.score(x_test, y_test))
-    print("带权重的测试集准确率为：" + classifier.score(x_test, y_test, sample_weights_test))
+    print("不带权重的测试集准确率为：", end='')
+    print(classifier.score(x_test, y_test))
+    print("带权重的测试集准确率为：", end='')
+    print(classifier.score(x_test, y_test, sample_weights_test))
     evaluating_indicator(y_pred, y_test)
     # utils.plot_decision_function(x_train, y_train, classifier)
 
@@ -153,8 +179,10 @@ def random_forest(x_train, y_train, x_test, y_test, sample_weights, sample_weigh
     )
     classifier.fit(x_train, y_train)
     y_pred = classifier.predict(x_test)
-    print("不带权重的测试集准确率为：" + classifier.score(x_test, y_test))
-    print("带权重的测试集准确率为：" + classifier.score(x_test, y_test, sample_weights_test))
+    print("不带权重的测试集准确率为：", end='')
+    print(classifier.score(x_test, y_test))
+    print("带权重的测试集准确率为：", end='')
+    print(classifier.score(x_test, y_test, sample_weights_test))
     evaluating_indicator(y_pred, y_test)
     # utils.plot_decision_function(x_train, y_train, classifier)
 
@@ -177,7 +205,9 @@ def xgboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_tes
     # classifier.fit(train_x, train_y, categorical_feature=category)
     classifier.fit(x_test, y_test, sample_weights)
     y_pred = classifier.predict(x_train)
-    print("不带权重的测试集准确率为：" + classifier.score(x_test, y_test))
-    print("带权重的测试集准确率为：" + classifier.score(x_test, y_test, sample_weights_test))
+    print("不带权重的测试集准确率为：", end='')
+    print(classifier.score(x_test, y_test))
+    print("带权重的测试集准确率为：", end='')
+    print(classifier.score(x_test, y_test, sample_weights_test))
     evaluating_indicator(y_pred, y_test)
     # utils.plot_decision_function(x_train, y_train, classifier)

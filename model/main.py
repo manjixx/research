@@ -1,27 +1,41 @@
 from model.models import *
-from sklearn.model_selection import train_test_split
-from model import utils
 
 if __name__ == '__main__':
-    file_path = "../dataset/synthetic_step.csv"
+    file_path = "../dataset/synthetic.csv"
+    synthetic = True
     x_features = ['ta', 'hr']
+    y_feature = ['pmv']
     c = [1, 0.1, 1]
     w = [1, 1, 1]
+
+    print("算法：pmv")
+    data = read_data(file_path, synthetic=synthetic, season='summer', algorithm='pmv')
+    pmv(np.array(data[x_features]), np.array(data[y_feature]))
+
+    # print("算法：svm, 分类指标： bmi")
+    # data = read_data(file_path, synthetic=synthetic, season='summer', algorithm='svm')
+    # x_train, y_train, x_test, y_test = split_svm_knn(
+    #     data, algorithm='svm', index='bmi',
+    #     x_feature=x_features, y_feature=y_feature,
+    #     normalization=False
+    # )
+    # kernel = ['linear', 'poly', 'rbf']
+    # svm(x_train, y_train, x_test, y_test, kernel, c)
+
+    print("算法：knn, 分类指标： bmi")
+
+    data = read_data(file_path, synthetic=synthetic, season='summer', algorithm='knn')
+    x_train, y_train, x_test, y_test = split_svm_knn(
+        data, algorithm='knn', index='bmi',
+        x_feature=x_features, y_feature=y_feature,
+        normalization=True
+    )
+    distance = ['manhattan', 'manhattan_inverse', 'manhattan_gauss', 'euclid', 'euclid_inverse', 'euclid_gauss']
+    knn(x_train, y_train, x_test, y_test, w, distance)
     # svm(file_path=file_path, x_features=x_features, index='bmi', c=c)
     # knn_model(file_path=file_path, x_features=x_features, w=w, neighbours=20)
-    data = pd.read_csv(file_path, encoding='gbk')
-    data = data.dropna(axis=0, how='any', inplace=False)
-    data.loc[(data['pmv'] > 0.5), 'pmv'] = 2
-    data.loc[(-0.5 <= data['pmv']) & (data['pmv'] <= 0.5), 'pmv'] = 1
-    data.loc[(data['pmv'] < -0.5), 'pmv'] = 0
-
-    x = np.array(data[['ta', 'hr']])
-    y = np.array(data[['pmv']]).flatten().astype(int)
-
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
-    print("start")
     # adaboost(x_train, y_train, x_test, y_test)
-    xgboost(x_train, y_train, x_test, y_test)
+    # xgboost(x_train, y_train, x_test, y_test)
     # random_forest(x_train, y_train, x_test, y_test)
 
 

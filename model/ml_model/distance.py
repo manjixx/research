@@ -6,10 +6,13 @@
 @Desc ：
 @Date ：2023/2/17 15:03 
 """
+import math
+import numpy as np
+
 
 class Distance(object):
 
-    def __int__(self, w):
+    def __init__(self, w):
         self.w = w
 
     # 曼哈顿距离
