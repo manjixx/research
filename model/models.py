@@ -81,8 +81,7 @@ def knn(x_train, y_train, x_test, y_test, weights, distance):
                 metric_params=None,
                 n_jobs=None
             )
-            print(type(x_train[0][0]))
-            print(type(x_train[0][1]))
+
             model.fit(x_train, y_train)
             y_pre = model.predict(x_test[i])
             accuracy, precision, recall, f1 = evaluating_indicator(y_pre, y_test[i])

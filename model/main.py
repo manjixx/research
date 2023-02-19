@@ -31,6 +31,13 @@ if __name__ == '__main__':
         normalization=True
     )
     distance = ['manhattan', 'manhattan_inverse', 'manhattan_gauss', 'euclid', 'euclid_inverse', 'euclid_gauss']
+    # for i in range(0, len(x_train)):
+    #     print(type(x_train[i][0]))
+    #     print(type(x_train[i][1]))
+    #     print(type(y_train[i]))
+    print(pd.DataFrame(x_train).info())
+    print(pd.DataFrame(y_train).info())
+
     knn(x_train, y_train, x_test, y_test, w, distance)
     # svm(file_path=file_path, x_features=x_features, index='bmi', c=c)
     # knn_model(file_path=file_path, x_features=x_features, w=w, neighbours=20)

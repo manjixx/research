@@ -87,6 +87,12 @@
 
 - 将`knn`模型用`sklearn`实现
 
+> 2022-02-20
+
+knn报错`TypeError: '<' not supported between instances of 'str' and 'int'`
+
+可能原因，数据序号有误所导致的，详细内容请参考[str”和“int”的实例之间不支持“<”，但在数据中找不到字符串](https://www.cnpython.com/qa/1459183)
+
 
 
 ## 六、Kernel Naive Bayes/NB

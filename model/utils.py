@@ -99,13 +99,12 @@ def split_svm_knn(data, algorithm, index, x_feature, y_feature, normalization):
         x_list = []
         y_list = []
         for i in range(0, 3):
-            x_train_temp = x_train_list[i]
-            y_train_temp = y_train_list[i]
-            for j in range(0, len(x_train_temp)):
-                x_list.append(x_train_temp[j])
-                y_list.append(y_train_temp[j])
-        x_train_list = np.array(x_list, dtype=object)
-        y_train_list = np.array(y_list, dtype=object).astype(int)
+            for j in range(0, len(x_train_list[i])):
+                x_list.append((pd.to_numeric(x_train_list[i][j])))
+                y_list.append(pd.to_numeric(y_train_list[i][j]))
+        x_train_list = x_list
+        y_train_list = y_list
+        # np.array(y_list, dtype=object).astype(int)
 
     return x_train_list, y_train_list, x_test_list, y_test_list
 
