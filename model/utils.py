@@ -88,7 +88,7 @@ def split_svm_knn(data, algorithm, index, x_feature, y_feature, normalization):
             y = np.array(y_list[i].stack())
         else:
             x = x_list[i]
-            y = np.array(y_list[i].stack())
+            y = np.array(y_list[i])
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
         x_train_list.append(x_train)
         y_train_list.append(y_train)
@@ -100,8 +100,8 @@ def split_svm_knn(data, algorithm, index, x_feature, y_feature, normalization):
         y_list = []
         for i in range(0, 3):
             for j in range(0, len(x_train_list[i])):
-                x_list.append((pd.to_numeric(x_train_list[i][j])))
-                y_list.append(pd.to_numeric(y_train_list[i][j]))
+                x_list.append(x_train_list[i][j].tolist())
+                y_list.append(y_train_list[i][j])
         x_train_list = x_list
         y_train_list = y_list
         # np.array(y_list, dtype=object).astype(int)
@@ -118,17 +118,23 @@ def split_ensemble(data, index, x_feature, y_feature, weights):
     sample_weights_test = []
 
     x_list, y_list = split_by_index(data, index, x_feature, y_feature)
+
     for i in range(0, 3):
         # 归一化
         x = preprocessing.MaxAbsScaler().fit_transform(x_list[i])
         y = np.array(y_list[i].stack())
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
-        x_train_list.append(x_train)
-        x_test_list.append(x_test)
-        y_train_list.append(y_train)
-        y_test_list.append(y_test)
-        sample_weights.append([weights[i] * len(x_train)])
-        sample_weights_test.append([weights[i] * len(x_test)])
+
+        for j in range(0, len(x_train)):
+            x_train_list.append(x_train[j])
+            y_train_list.append(y_train[j])
+            sample_weights.append(weights[i])
+
+        for k in range(0, len(x_test)):
+            x_test_list.append(x_test[k])
+            y_test_list.append(y_test[k])
+            sample_weights_test.append(weights[i])
+
     return x_train_list, y_train_list, x_test_list, y_test_list, sample_weights, sample_weights_test
 
 

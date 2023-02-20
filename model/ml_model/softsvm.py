@@ -8,7 +8,7 @@ def soft_svm(x_train, y_train, x_test, y_test, kernel, C):
     model = SVC(kernel=kernel, decision_function_shape='ovr', C=C).fit(x_train, y_train)
     y_pre = model.predict(x_test)
     accuracy, precision, recall, f1 = evaluating_indicator(y_pre, y_test)
-    plot_svm(model, x_train, y_train)
+    # plot_svm(model, x_train, y_train)
     return accuracy, precision, recall, f1
 
 

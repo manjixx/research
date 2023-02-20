@@ -91,8 +91,17 @@
 
 knn报错`TypeError: '<' not supported between instances of 'str' and 'int'`
 
-可能原因，数据序号有误所导致的，详细内容请参考[str”和“int”的实例之间不支持“<”，但在数据中找不到字符串](https://www.cnpython.com/qa/1459183)
+- 错误原因，模型参数`leafsize`要求为`int`，实际传参类型为`str`
 
+完成所有模型初步测试
+解决knn报错bug
+
+> 2022-02-21
+
+- 特征选择
+- knn 距离函数选择
+- knn: k值确定
+- randomForest,x_feature
 
 
 ## 六、Kernel Naive Bayes/NB

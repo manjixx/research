@@ -1,7 +1,10 @@
+import numpy as np
+
 from ml_model.pmv import *
 from ml_model.softsvm import *
 from ml_model.distance import *
 from sklearn.svm import SVC
+from sklearn.linear_model import SGDClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import RandomForestClassifier
@@ -67,26 +70,27 @@ def svm(x_train, y_train, x_test, y_test, kernel, C):
 
 
 def knn(x_train, y_train, x_test, y_test, weights, distance):
-    for i in range(0, len(x_test)):
+
+    for i in range(0, 3):
         print("开始第"+str(i)+"轮训练")
         for d in distance:
-            distance = Distance(weights[i])
+            print("距离函数为：" + d)
+            dis = Distance(weights[i])
             model = KNeighborsClassifier(
                 n_neighbors=5,
                 weights='uniform',
                 algorithm='auto',
-                leaf_size='30',
+                leaf_size=30,
                 p=2,
-                metric=getattr(distance, d),
+                metric=getattr(dis, d),
                 metric_params=None,
                 n_jobs=None
             )
-
             model.fit(x_train, y_train)
             y_pre = model.predict(x_test[i])
             accuracy, precision, recall, f1 = evaluating_indicator(y_pre, y_test[i])
-            plot_decision_function(x_test[i], y_test[i], model)
-
+            # plot_decision_function(x_test, y_test, model)
+        print('*****************************')
 
 # def knn(x_train, y_train, x_test, y_test, weights, distance, neighbor):
 #     model = KNN(x_train, y_train)
@@ -116,14 +120,17 @@ def adaboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_te
 
     # 异质
     print("AdaBoost: 异质")
-    classifier = AdaBoostClassifier(
-        base_estimator=[
-            DecisionTreeClassifier(max_depth=2),
-            LogisticRegression(),
-            SVC(C=5.0, kernel='rbf', probability=True)],
-        n_estimators=10,
-        learning_rate=1
-    )
+    classifier = AdaBoostClassifier(SVC(probability=True, kernel='linear'))
+    # classifier = AdaBoostClassifier(
+    #     base_estimator=[
+    #         DecisionTreeClassifier(max_depth=2),
+    #         LogisticRegression(),
+    #         SGDClassifier(loss='hinge')],
+    #     # algorithm='SAMME',
+    #     n_estimators=10,
+    #     learning_rate=1,
+    # )
+    sample_weights = np.array(sample_weights)
     classifier.fit(x_train, y_train, sample_weights)
     y_pred = classifier.predict(x_test)
     print("不带权重的测试集准确率为：", end='')
@@ -137,14 +144,17 @@ def adaboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_te
     # 权重衰减
     print("AdaBoost: 权重衰减")
     classifier = AdaBoostClassifier(
-        base_estimator=[
-            DecisionTreeClassifier(max_depth=2),
-            LogisticRegression(),
-            SVC(C=5.0, kernel='rbf', probability=True)],
+        DecisionTreeClassifier(max_depth=2),
+        # SVC(probability=True, kernel='linear'),
+        # base_estimator=[
+        #     DecisionTreeClassifier(max_depth=2),
+        #     LogisticRegression(),
+        #     SGDClassifier(loss='hinge')],
+        # algorithm='SAMME',
         n_estimators=10,
-        learning_rate=0.5
+        learning_rate=1.0
     )
-    classifier.fit(x_train, y_train, sample_weights, sample_weights_test)
+    classifier.fit(x_train, y_train, sample_weights)
     y_pred = classifier.predict(x_test)
     print("不带权重的测试集准确率为：", end='')
     print(classifier.score(x_test, y_test))
@@ -157,7 +167,7 @@ def adaboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_te
 def random_forest(x_train, y_train, x_test, y_test, sample_weights, sample_weights_test):
     # 同质
     classifier = RandomForestClassifier(
-        base_estimator_=DecisionTreeClassifier(max_depth=2)
+        max_depth=2, random_state=0
     )
     classifier.fit(x_train, y_train, sample_weights)
     y_pred = classifier.predict(x_test)
@@ -167,23 +177,23 @@ def random_forest(x_train, y_train, x_test, y_test, sample_weights, sample_weigh
     print(classifier.score(x_test, y_test, sample_weights_test))
     evaluating_indicator(y_pred, y_test)
     # utils.plot_decision_function(x_train, y_train, classifier)
-
-    # 异质
-    classifier = RandomForestClassifier(
-        base_estimator=[
-            DecisionTreeClassifier(max_depth=2),
-            LogisticRegression(),
-            SVC(C=5.0, kernel='rbf', probability=True)],
-        class_weight={0: 1, 1: 1.2, 2: 1}
-    )
-    classifier.fit(x_train, y_train)
-    y_pred = classifier.predict(x_test)
-    print("不带权重的测试集准确率为：", end='')
-    print(classifier.score(x_test, y_test))
-    print("带权重的测试集准确率为：", end='')
-    print(classifier.score(x_test, y_test, sample_weights_test))
-    evaluating_indicator(y_pred, y_test)
-    # utils.plot_decision_function(x_train, y_train, classifier)
+    #
+    # # 异质
+    # classifier = RandomForestClassifier(
+    #     base_estimator=[
+    #         DecisionTreeClassifier(max_depth=2),
+    #         LogisticRegression(),
+    #         SVC(C=5.0, kernel='rbf', probability=True)],
+    #     class_weight={0: 1, 1: 1.2, 2: 1}
+    # )
+    # classifier.fit(x_train, y_train)
+    # y_pred = classifier.predict(x_test)
+    # print("不带权重的测试集准确率为：", end='')
+    # print(classifier.score(x_test, y_test))
+    # print("带权重的测试集准确率为：", end='')
+    # print(classifier.score(x_test, y_test, sample_weights_test))
+    # evaluating_indicator(y_pred, y_test)
+    # # utils.plot_decision_function(x_train, y_train, classifier)
 
 
 def xgboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_test):
@@ -202,8 +212,8 @@ def xgboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_tes
         class_weight={0: 1, 1: 1.2, 2: 1}
     )
     # classifier.fit(train_x, train_y, categorical_feature=category)
-    classifier.fit(x_test, y_test, sample_weights)
-    y_pred = classifier.predict(x_train)
+    classifier.fit(x_train, y_train, sample_weights)
+    y_pred = classifier.predict(x_test)
     print("不带权重的测试集准确率为：", end='')
     print(classifier.score(x_test, y_test))
     print("带权重的测试集准确率为：", end='')
