@@ -92,23 +92,11 @@ def knn(x_train, y_train, x_test, y_test, weights, distance):
             # plot_decision_function(x_test, y_test, model)
         print('*****************************')
 
-# def knn(x_train, y_train, x_test, y_test, weights, distance, neighbor):
-#     model = KNN(x_train, y_train)
-#     model.neighbors = neighbor
-#     for i in range(0, len(x_test)):
-#         print("开始第"+str(i)+"轮训练")
-#         for d in distance:
-#             print("距离函数为" + d)
-#             model.distance = d
-#             y_pre = model.predict(x_test[i], weights[i])
-#             accuracy, precision, recall, f1 = evaluating_indicator(y_pre, y_test)
-#             knn_plot(model, x_test[i], y_test[i], weights[i])
-
 
 def adaboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_test):
     # 同质
-    print("AdaBoost: 同质")
-    classifier = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=2), n_estimators=10)
+    print("AdaBoost: 基分类器为：决策树")
+    classifier = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=2), n_estimators=3)
     classifier.fit(x_train, y_train, sample_weights)
     y_pred = classifier.predict(x_test)
     print("不带权重的测试集准确率为：", end='')
@@ -119,17 +107,8 @@ def adaboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_te
     # utils.plot_decision_function(x_train, y_train, classifier)
 
     # 异质
-    print("AdaBoost: 异质")
-    classifier = AdaBoostClassifier(SVC(probability=True, kernel='linear'))
-    # classifier = AdaBoostClassifier(
-    #     base_estimator=[
-    #         DecisionTreeClassifier(max_depth=2),
-    #         LogisticRegression(),
-    #         SGDClassifier(loss='hinge')],
-    #     # algorithm='SAMME',
-    #     n_estimators=10,
-    #     learning_rate=1,
-    # )
+    print("AdaBoost: 基分类器为：SVM")
+    classifier = AdaBoostClassifier(SVC(probability=True, kernel='linear'), n_estimators=3)
     sample_weights = np.array(sample_weights)
     classifier.fit(x_train, y_train, sample_weights)
     y_pred = classifier.predict(x_test)
@@ -142,7 +121,7 @@ def adaboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_te
     # utils.plot_decision_function(x_train, y_train, classifier)
 
     # 权重衰减
-    print("AdaBoost: 权重衰减")
+    print("AdaBoost: 基分类器为：决策树, 权重衰减")
     classifier = AdaBoostClassifier(
         DecisionTreeClassifier(max_depth=2),
         # SVC(probability=True, kernel='linear'),
@@ -151,7 +130,7 @@ def adaboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_te
         #     LogisticRegression(),
         #     SGDClassifier(loss='hinge')],
         # algorithm='SAMME',
-        n_estimators=10,
+        n_estimators=3,
         learning_rate=1.0
     )
     classifier.fit(x_train, y_train, sample_weights)
@@ -177,23 +156,6 @@ def random_forest(x_train, y_train, x_test, y_test, sample_weights, sample_weigh
     print(classifier.score(x_test, y_test, sample_weights_test))
     evaluating_indicator(y_pred, y_test)
     # utils.plot_decision_function(x_train, y_train, classifier)
-    #
-    # # 异质
-    # classifier = RandomForestClassifier(
-    #     base_estimator=[
-    #         DecisionTreeClassifier(max_depth=2),
-    #         LogisticRegression(),
-    #         SVC(C=5.0, kernel='rbf', probability=True)],
-    #     class_weight={0: 1, 1: 1.2, 2: 1}
-    # )
-    # classifier.fit(x_train, y_train)
-    # y_pred = classifier.predict(x_test)
-    # print("不带权重的测试集准确率为：", end='')
-    # print(classifier.score(x_test, y_test))
-    # print("带权重的测试集准确率为：", end='')
-    # print(classifier.score(x_test, y_test, sample_weights_test))
-    # evaluating_indicator(y_pred, y_test)
-    # # utils.plot_decision_function(x_train, y_train, classifier)
 
 
 def xgboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_test):

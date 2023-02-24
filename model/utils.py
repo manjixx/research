@@ -10,8 +10,7 @@ warnings.filterwarnings('ignore')  # "error", "ignore", "always", "default", "mo
 
 
 def read_data(file_path, synthetic, season, algorithm):
-    data = pd.read_csv(file_path, encoding='gbk')
-    data = data.dropna(axis=0, how='any', inplace=False)
+    data = pd.read_csv(file_path, encoding='gbk').dropna(axis=0, how='any', inplace=False)
     if season:
         data = data.loc[data['season'] == season]
     if synthetic:

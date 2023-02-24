@@ -25,7 +25,10 @@ def feature_importance(x_train, y_train):
                                  warm_start=False)
     # clf = RandomForestClassifier(n_estimators=100)
     clf.fit(x_train, y_train)
-    feature_imp = pd.Series(clf.feature_importances_, index=x_train.feature_names).sort_values(ascending=False)
+    index = ['gender', 'age', 'height', 'weight', 'bmi', 'preference',
+                   'sensitivity', 'environment', 'thermal comfort ',
+                   'thermal preference', 'ta', 'hr', 'griffith']
+    feature_imp = pd.Series(clf.feature_importances_, index=index).sort_values(ascending=False)
     print(feature_imp)
     sns.barplot(x=feature_imp, y=feature_imp.index)
     plt.xlabel('Feature Importance Score')
