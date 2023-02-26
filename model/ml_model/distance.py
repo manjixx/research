@@ -17,7 +17,8 @@ class Distance(object):
 
     # 曼哈顿距离
     def manhattan(self, a, b):
-        return np.sum(np.abs(self.w * (a - b)), axis=0)
+        # return np.sum(np.abs(self.w * (a - b)), axis=0)
+        return np.sum(self.w * np.abs((a - b)), axis=0)
 
     # 曼哈顿距离反函数
     def manhattan_inverse(self, a, b):
@@ -34,7 +35,8 @@ class Distance(object):
 
     # 欧式距离
     def euclid(self, a, b):
-        return np.sqrt(np.sum((self.w * (a - b)) ** 2, axis=0).astype('float'))
+        # return np.sqrt(np.sum((self.w * (a - b)) ** 2, axis=0).astype('float'))
+        return np.sqrt(self.w * np.sum((a - b) ** 2, axis=0).astype('float'))
 
     # 欧式距离反函数
     def euclid_inverse(self, a, b):

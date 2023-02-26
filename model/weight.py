@@ -46,6 +46,7 @@ def proportion(data, index):
 
 
 def sample_weight(data):
+
     weight = []
 
     for i in range(0, data.shape[0]):
@@ -76,6 +77,7 @@ def sample_weight(data):
             bmi = 2
 
         w = sensitivity * 4 + griffith * 3 + preference * 2 + bmi
+
         weight.append(w)
 
     w_max = max(weight)

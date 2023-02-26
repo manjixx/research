@@ -103,38 +103,39 @@ def split_svm_knn(data, algorithm, index, x_feature, y_feature, normalization):
                 y_list.append(y_train_list[i][j])
         x_train_list = x_list
         y_train_list = y_list
-        # np.array(y_list, dtype=object).astype(int)
 
     return x_train_list, y_train_list, x_test_list, y_test_list
 
 
-def split_ensemble(data, index, x_feature, y_feature, weights):
-    x_train_list = []
-    y_train_list = []
-    sample_weights = []
-    x_test_list = []
-    y_test_list = []
-    sample_weights_test = []
+def split_ensemble(data, index, x_feature, y_feature):
+    x = data[x_feature]
+    y = data[y_feature]
 
-    x_list, y_list = split_by_index(data, index, x_feature, y_feature)
+    x_list = preprocessing.MaxAbsScaler().fit_transform(x)
+    y_list = np.array(y.stack())
 
-    for i in range(0, 3):
-        # 归一化
-        x = preprocessing.MaxAbsScaler().fit_transform(x_list[i])
-        y = np.array(y_list[i].stack())
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
+    x_train, x_test, y_train, y_test = train_test_split(x_list, y_list, test_size=0.2)
 
-        for j in range(0, len(x_train)):
-            x_train_list.append(x_train[j])
-            y_train_list.append(y_train[j])
-            sample_weights.append(weights[i])
+    return x_train, x_test, y_train, y_test
 
-        for k in range(0, len(x_test)):
-            x_test_list.append(x_test[k])
-            y_test_list.append(y_test[k])
-            sample_weights_test.append(weights[i])
 
-    return x_train_list, y_train_list, x_test_list, y_test_list, sample_weights, sample_weights_test
+def split_ensemble_wsw(data, index, x_feature, y_feature, sample_weight):
+
+    data['sample_weight'] = sample_weight
+    x_feature.append('sample_weight')
+    x = data[x_feature]
+    y = data[y_feature]
+
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
+
+    x_feature.remove('sample_weight')
+
+    x_train_list = preprocessing.MaxAbsScaler().fit_transform(x_train[x_feature])
+    weight = x_train[['sample_weight']]
+    x_test_list = preprocessing.MaxAbsScaler().fit_transform(x_test[x_feature])
+    test_weight = x_test[['sample_weight']]
+
+    return x_train_list, x_test_list, y_train, y_test, weight, test_weight
 
 
 def plot_decision_function(X, y, clf, support_vectors=None):
@@ -196,13 +197,46 @@ def plot_contourf(data, func, lines=3):
     plt.scatter(data[:, 0], data[:, 1])
 
 
+def avg_indicator(precision, recall, f1):
+
+
+    p_macro = 0
+    p_micro = 0
+    p_weight = 0
+    r_macro = 0
+    r_micro = 0
+    r_weight = 0
+    f1_macro = 0
+    f1_micro = 0
+    f1_weight = 0
+    for i in range(0, 3):
+        p_macro += 1 / 3 * precision[i][0]
+        p_micro += 1 / 3 * precision[i][1]
+        p_weight += 1 / 3 * precision[i][2]
+        r_macro += 1 / 3 * recall[i][0]
+        r_micro += 1 / 3 * recall[i][1]
+        r_weight += 1 / 3 * recall[i][2]
+        f1_macro += 1 / 3 * f1[i][0]
+        f1_micro += 1 / 3 * f1[i][1]
+        f1_weight += 1 / 3 * f1[i][2]
+    print("精确率-macro:" + str(p_macro))
+    print("精确率-micro:" + str(p_micro))
+    print("精确率-weight:" + str(p_weight))
+    print("召回率-macro:" + str(r_macro))
+    print("召回率-micro:" + str(r_micro))
+    print("召回率-weight:" + str(r_weight))
+    print("F1 score-macro:" + str(f1_macro))
+    print("F1 score-micro:" + str(f1_micro))
+    print("F1 score-weight:" + str(f1_weight))
+
+
 def evaluating_indicator(y_pre, y_test):
     accuracy = {}
     precision = {}
     recall = {}
     f1 = {}
     # 准确率
-    accuracy.update({'训练集准确率：': accuracy_score(y_test, y_pre)})
+    accuracy.update({'测试集准确率：': accuracy_score(y_test, y_pre)})
 
     # 精确率
     precision.update({'精确率-macro：': precision_score(y_test, y_pre, average='macro')})
@@ -221,15 +255,15 @@ def evaluating_indicator(y_pre, y_test):
     f1.update({'F1 score-micro：': f1_score(y_test, y_pre, average='micro')})
     f1.update({'F1 score-weighted：': f1_score(y_test, y_pre, average='weighted')})
     # f1.update({'F1 score-None：': f1_score(y_test, y_pre, average=None)})
-
-    for kv in accuracy.items():
-        print(kv)
-    for kv in precision.items():
-        print(kv)
-    for kv in recall.items():
-        print(kv)
-    for kv in f1.items():
-        print(kv)
+    #
+    # for kv in accuracy.items():
+    #     print(kv)
+    # for kv in precision.items():
+    #     print(kv)
+    # for kv in recall.items():
+    #     print(kv)
+    # for kv in f1.items():
+    #     print(kv)
 
     return accuracy, precision, recall, f1
 

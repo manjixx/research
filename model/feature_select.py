@@ -37,6 +37,17 @@ def feature_importance(x_train, y_train):
     plt.legend()
     plt.show()
 
+    # data = read_data(file_path, synthetic=synthetic, season='summer',
+    #                  algorithm='other')
+    #
+    # x = data[['gender', 'age', 'height', 'weight', 'bmi', 'preference',
+    #                'sensitivity', 'environment', 'thermal comfort ',
+    #                'thermal preference', 'ta', 'hr', 'griffith']]
+    # y = data[["thermal sensation"]]
+    #
+    # x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
+    # feature_importance(x_train, y_train)
+
 
 def cross_val(x_train, y_train, neighbour):
     scores = []

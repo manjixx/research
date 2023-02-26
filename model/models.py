@@ -62,19 +62,36 @@ def pmv(data, target):
 
 
 def svm(x_train, y_train, x_test, y_test, kernel, C):
-    for i in range(0, len(C)):
-        for k in kernel:
-            print(f'第{i + 1}类：', end='')
-            print("核函数为：" + k)
-            soft_svm(x_train[i], y_train[i], x_test[i], y_test[i], k, C[i])
+    precision_all = []
+    recall_all = []
+    f1_all = []
+    for k in kernel:
+        print("核函数为：" + k)
+        count = 0
+        accuracy_count = 0
+        for i in range(0, len(C)):
+            # print(f'第{i + 1}类：', end='')
+            accuracy, precision, recall, f1 = soft_svm(x_train[i], y_train[i], x_test[i], y_test[i], k, C[i])
+            count += len(x_test[i])
+            accuracy_count += accuracy.get('测试集准确率：') * len(x_test[i])
+            precision_all.append(list(precision.values()))
+            recall_all.append(list(recall.values()))
+            f1_all.append(list(f1.values()))
+
+        print("测试集精确率为：" + str(accuracy_count / count))
+        avg_indicator(precision_all, recall_all, f1_all)
 
 
 def knn(x_train, y_train, x_test, y_test, weights, distance):
-
-    for i in range(0, 3):
-        print("开始第"+str(i)+"轮训练")
-        for d in distance:
-            print("距离函数为：" + d)
+    precision_all = []
+    recall_all = []
+    f1_all = []
+    for d in distance:
+        count = 0
+        accuracy_count = 0
+        print("距离函数为：" + d)
+        for i in range(0, 3):
+            # print("开始第"+str(i)+"轮训练")
             dis = Distance(weights[i])
             model = KNeighborsClassifier(
                 n_neighbors=5,
@@ -90,7 +107,14 @@ def knn(x_train, y_train, x_test, y_test, weights, distance):
             y_pre = model.predict(x_test[i])
             accuracy, precision, recall, f1 = evaluating_indicator(y_pre, y_test[i])
             # plot_decision_function(x_test, y_test, model)
-        print('*****************************')
+            count += len(x_test[i])
+            accuracy_count += accuracy.get('测试集准确率：') * len(x_test[i])
+            precision_all.append(list(precision.values()))
+            recall_all.append(list(recall.values()))
+            f1_all.append(list(f1.values()))
+
+        print("测试集精确率为：" + str(accuracy_count / count))
+        avg_indicator(precision_all, recall_all, f1_all)
 
 
 def adaboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_test):
@@ -103,7 +127,7 @@ def adaboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_te
     print(classifier.score(x_test, y_test))
     print("带权重的测试集准确率为：", end='')
     print(classifier.score(x_test, y_test, sample_weights_test))
-    evaluating_indicator(y_pred, y_test)
+    accuracy, precision, recall, f1 = evaluating_indicator(y_pred, y_test)
     # utils.plot_decision_function(x_train, y_train, classifier)
 
     # 异质
@@ -116,7 +140,7 @@ def adaboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_te
     print(classifier.score(x_test, y_test))
     print("带权重的测试集准确率为：", end='')
     print(classifier.score(x_test, y_test, sample_weights_test))
-    evaluating_indicator(y_pred, y_test)
+    accuracy, precision, recall, f1 = evaluating_indicator(y_pred, y_test)
 
     # utils.plot_decision_function(x_train, y_train, classifier)
 
@@ -139,7 +163,7 @@ def adaboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_te
     print(classifier.score(x_test, y_test))
     print("带权重的测试集准确率为：", end='')
     print(classifier.score(x_test, y_test, sample_weights_test))
-    evaluating_indicator(y_pred, y_test)
+    accuracy, precision, recall, f1 = evaluating_indicator(y_pred, y_test)
     # utils.plot_decision_function(x_train, y_train, classifier)
 
 
@@ -154,7 +178,7 @@ def random_forest(x_train, y_train, x_test, y_test, sample_weights, sample_weigh
     print(classifier.score(x_test, y_test))
     print("带权重的测试集准确率为：", end='')
     print(classifier.score(x_test, y_test, sample_weights_test))
-    evaluating_indicator(y_pred, y_test)
+    accuracy, precision, recall, f1 = evaluating_indicator(y_pred, y_test)
     # utils.plot_decision_function(x_train, y_train, classifier)
 
 
@@ -180,5 +204,5 @@ def xgboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_tes
     print(classifier.score(x_test, y_test))
     print("带权重的测试集准确率为：", end='')
     print(classifier.score(x_test, y_test, sample_weights_test))
-    evaluating_indicator(y_pred, y_test)
+    accuracy, precision, recall, f1 = evaluating_indicator(y_pred, y_test)
     # utils.plot_decision_function(x_train, y_train, classifier)
