@@ -107,19 +107,38 @@ def split_svm_knn(data, algorithm, index, x_feature, y_feature, normalization):
     return x_train_list, y_train_list, x_test_list, y_test_list
 
 
-def split_ensemble(data, index, x_feature, y_feature):
-    x = data[x_feature]
-    y = data[y_feature]
+def split_ensemble_wcs(data, index, x_feature, y_feature, class_weight):
 
-    x_list = preprocessing.MaxAbsScaler().fit_transform(x)
-    y_list = np.array(y.stack())
+    x_train_list = []
+    y_train_list = []
+    sample_weight = []
 
-    x_train, x_test, y_train, y_test = train_test_split(x_list, y_list, test_size=0.2)
+    x_test_list = []
+    y_test_list = []
+    test_sample_weight = []
 
-    return x_train, x_test, y_train, y_test
+    x_list, y_list = split_by_index(data, index, x_feature, y_feature)
+
+    for i in range(0, 3):
+        # 归一化
+        x = preprocessing.MaxAbsScaler().fit_transform(x_list[i])
+        y = np.array(y_list[i].stack())
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
+
+        for j in range(0, len(x_train)):
+            x_train_list.append(x_train[j])
+            y_train_list.append(y_train[j])
+            sample_weight.append(class_weight[i])
+
+        for k in range(0, len(x_test)):
+            x_test_list.append(x_test[k])
+            y_test_list.append(y_test[k])
+            test_sample_weight.append(class_weight[i])
+
+    return x_train_list, x_test_list, y_train_list, y_test_list, sample_weight, test_sample_weight
 
 
-def split_ensemble_wsw(data, index, x_feature, y_feature, sample_weight):
+def split_ensemble_wsw(data, x_feature, y_feature, sample_weight):
 
     data['sample_weight'] = sample_weight
     x_feature.append('sample_weight')
@@ -131,11 +150,11 @@ def split_ensemble_wsw(data, index, x_feature, y_feature, sample_weight):
     x_feature.remove('sample_weight')
 
     x_train_list = preprocessing.MaxAbsScaler().fit_transform(x_train[x_feature])
-    weight = x_train[['sample_weight']]
+    sample_weight = np.array(x_train[['sample_weight']]).flatten()
     x_test_list = preprocessing.MaxAbsScaler().fit_transform(x_test[x_feature])
-    test_weight = x_test[['sample_weight']]
+    test_sample_weight = np.array(x_test[['sample_weight']]).flatten()
 
-    return x_train_list, x_test_list, y_train, y_test, weight, test_weight
+    return x_train_list, x_test_list, y_train, y_test, sample_weight, test_sample_weight
 
 
 def plot_decision_function(X, y, clf, support_vectors=None):
@@ -198,7 +217,6 @@ def plot_contourf(data, func, lines=3):
 
 
 def avg_indicator(precision, recall, f1):
-
 
     p_macro = 0
     p_micro = 0

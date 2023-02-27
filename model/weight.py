@@ -23,7 +23,7 @@ def proportion(data, index):
     elif index == 'griffith':
         low_count = data[(data[index] <= 0.8)].shape[0]
         mid_count = data[(data[index] < 1.2) & (data[index] > 0.8)].shape[0]
-        high_count = data[(data[index] >= 1.2)]
+        high_count = data[(data[index] >= 1.2)].shape[0]
     elif index == 'preference':
         low_count = data[(data[index] == -1)].shape[0]
         mid_count = data[(data[index] == 0)].shape[0]
@@ -80,9 +80,11 @@ def sample_weight(data):
 
         weight.append(w)
 
-    w_max = max(weight)
+    w_max = min(weight)
 
     for i in range(0, len(weight)):
         weight[i] = round(weight[i] / w_max, 2)
+
+    print(weight)
 
     return weight

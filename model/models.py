@@ -4,12 +4,10 @@ from ml_model.pmv import *
 from ml_model.softsvm import *
 from ml_model.distance import *
 from sklearn.svm import SVC
-from sklearn.linear_model import SGDClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.linear_model import LogisticRegression
 from lightgbm.sklearn import LGBMClassifier
 from utils import *
 
@@ -59,6 +57,18 @@ def pmv(data, target):
     print("pmv模型类别精度为：", end='')
     accuracy = accuracy_score(pmv_pred_level, target)
     print(accuracy)
+
+    print("pmv模型类别precision为：", end='')
+    precision = precision_score(pmv_pred_level, target, average='macro')
+    print(precision)
+
+    print("pmv模型类别recall为：", end='')
+    recall = recall_score(pmv_pred_level, target, average='macro')
+    print(recall)
+
+    print("pmv模型类别f1为：", end='')
+    f1 = f1_score(pmv_pred_level, target, average='macro')
+    print(f1)
 
 
 def svm(x_train, y_train, x_test, y_test, kernel, C):
@@ -117,92 +127,168 @@ def knn(x_train, y_train, x_test, y_test, weights, distance):
         avg_indicator(precision_all, recall_all, f1_all)
 
 
-def adaboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_test):
-    # 同质
+def adaboost(x_train, x_test, y_train, y_test, sample_weight, test_sample_weight):
+
+    # 基分类器为：决策树
     print("AdaBoost: 基分类器为：决策树")
-    classifier = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=2), n_estimators=3)
-    classifier.fit(x_train, y_train, sample_weights)
+    classifier = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=3), n_estimators=3)
+    classifier.fit(x_train, y_train, sample_weight)
     y_pred = classifier.predict(x_test)
     print("不带权重的测试集准确率为：", end='')
     print(classifier.score(x_test, y_test))
     print("带权重的测试集准确率为：", end='')
-    print(classifier.score(x_test, y_test, sample_weights_test))
+    print(classifier.score(x_test, y_test, test_sample_weight))
     accuracy, precision, recall, f1 = evaluating_indicator(y_pred, y_test)
-    # utils.plot_decision_function(x_train, y_train, classifier)
+    # for kv in accuracy.items():
+    #     print(kv)
+    for kv in precision.items():
+        print(kv)
+    for kv in recall.items():
+        print(kv)
+    for kv in f1.items():
+        print(kv)
 
-    # 异质
-    print("AdaBoost: 基分类器为：SVM")
-    classifier = AdaBoostClassifier(SVC(probability=True, kernel='linear'), n_estimators=3)
-    sample_weights = np.array(sample_weights)
-    classifier.fit(x_train, y_train, sample_weights)
-    y_pred = classifier.predict(x_test)
-    print("不带权重的测试集准确率为：", end='')
-    print(classifier.score(x_test, y_test))
-    print("带权重的测试集准确率为：", end='')
-    print(classifier.score(x_test, y_test, sample_weights_test))
-    accuracy, precision, recall, f1 = evaluating_indicator(y_pred, y_test)
-
-    # utils.plot_decision_function(x_train, y_train, classifier)
-
-    # 权重衰减
-    print("AdaBoost: 基分类器为：决策树, 权重衰减")
-    classifier = AdaBoostClassifier(
-        DecisionTreeClassifier(max_depth=2),
-        # SVC(probability=True, kernel='linear'),
-        # base_estimator=[
-        #     DecisionTreeClassifier(max_depth=2),
-        #     LogisticRegression(),
-        #     SGDClassifier(loss='hinge')],
-        # algorithm='SAMME',
-        n_estimators=3,
-        learning_rate=1.0
-    )
-    classifier.fit(x_train, y_train, sample_weights)
-    y_pred = classifier.predict(x_test)
-    print("不带权重的测试集准确率为：", end='')
-    print(classifier.score(x_test, y_test))
-    print("带权重的测试集准确率为：", end='')
-    print(classifier.score(x_test, y_test, sample_weights_test))
-    accuracy, precision, recall, f1 = evaluating_indicator(y_pred, y_test)
-    # utils.plot_decision_function(x_train, y_train, classifier)
-
-
-def random_forest(x_train, y_train, x_test, y_test, sample_weights, sample_weights_test):
-    # 同质
-    classifier = RandomForestClassifier(
-        max_depth=2, random_state=0
-    )
-    classifier.fit(x_train, y_train, sample_weights)
-    y_pred = classifier.predict(x_test)
-    print("不带权重的测试集准确率为：", end='')
-    print(classifier.score(x_test, y_test))
-    print("带权重的测试集准确率为：", end='')
-    print(classifier.score(x_test, y_test, sample_weights_test))
-    accuracy, precision, recall, f1 = evaluating_indicator(y_pred, y_test)
-    # utils.plot_decision_function(x_train, y_train, classifier)
+    # # 基分类器为：SVM
+    # print("AdaBoost: 基分类器为：SVM")
+    # classifier = AdaBoostClassifier(SVC(probability=True, kernel='linear'), n_estimators=50)
+    # classifier.fit(x_train, y_train, sample_weight)
+    # y_pred = classifier.predict(x_test)
+    # print("不带权重的测试集准确率为：", end='')
+    # print(classifier.score(x_test, y_test))
+    # print("带权重的测试集准确率为：", end='')
+    # print(classifier.score(x_test, y_test, test_sample_weight))
+    # accuracy, precision, recall, f1 = evaluating_indicator(y_pred, y_test)
+    # # utils.plot_decision_function(x_train, y_train, classifier)
+    # for kv in precision.items():
+    #     print(kv)
+    # for kv in recall.items():
+    #     print(kv)
+    # for kv in f1.items():
+    #     print(kv)
+    #
+    # # 基分类器为：决策树, 权重衰减
+    # print("AdaBoost: 基分类器为：决策树, 权重衰减")
+    # classifier = AdaBoostClassifier(
+    #     DecisionTreeClassifier(max_depth=3),
+    #     n_estimators=2048,
+    #     learning_rate=0.0075
+    # )
+    # classifier.fit(x_train, y_train, sample_weight)
+    # y_pred = classifier.predict(x_test)
+    # print("不带权重的测试集准确率为：", end='')
+    # print(classifier.score(x_test, y_test))
+    # print("带权重的测试集准确率为：", end='')
+    # print(classifier.score(x_test, y_test, test_sample_weight))
+    # accuracy, precision, recall, f1 = evaluating_indicator(y_pred, y_test)
+    # # utils.plot_decision_function(x_train, y_train, classifier)
+    # for kv in precision.items():
+    #     print(kv)
+    # for kv in recall.items():
+    #     print(kv)
+    # for kv in f1.items():
+    #     print(kv)
 
 
-def xgboost(x_train, y_train, x_test, y_test, sample_weights, sample_weights_test):
-    category = [23, 25, 27, 28]  ##30_改
-    classifier = LGBMClassifier(
-        learning_rate=0.0075,
-        max_depth=7,
-        n_estimators=2048,
-        num_leaves=63,
-        random_state=2019,
-        n_jobs=-1,
-        reg_alpha=0.8,
-        reg_lambda=0.8,
-        subsample=0.2,
-        colsample_bytree=0.5,
-        class_weight={0: 1, 1: 1.2, 2: 1}
-    )
-    # classifier.fit(train_x, train_y, categorical_feature=category)
-    classifier.fit(x_train, y_train, sample_weights)
-    y_pred = classifier.predict(x_test)
-    print("不带权重的测试集准确率为：", end='')
-    print(classifier.score(x_test, y_test))
-    print("带权重的测试集准确率为：", end='')
-    print(classifier.score(x_test, y_test, sample_weights_test))
-    accuracy, precision, recall, f1 = evaluating_indicator(y_pred, y_test)
-    # utils.plot_decision_function(x_train, y_train, classifier)
+def random_forest(x_train, x_test, y_train, y_test, class_weight, sample_weight, test_sample_weight):
+
+    # 样本权重
+
+    if class_weight:
+        classifier = RandomForestClassifier(
+            max_depth=2, random_state=0, class_weight=class_weight
+        )
+        classifier.fit(x_train, y_train)
+        y_pred = classifier.predict(x_test)
+        accuracy, precision, recall, f1 = evaluating_indicator(y_pred, y_test)
+        # utils.plot_decision_function(x_train, y_train, classifier)
+        for kv in accuracy.items():
+            print(kv)
+        for kv in precision.items():
+            print(kv)
+        for kv in recall.items():
+            print(kv)
+        for kv in f1.items():
+            print(kv)
+
+    # 人员权重
+
+    if (sample_weight is not None) and (sample_weight.size != 0):
+        classifier = RandomForestClassifier(
+            max_depth=2, random_state=0
+        )
+        classifier.fit(x_train, y_train, sample_weight)
+        y_pred = classifier.predict(x_test)
+        print("不带权重的测试集准确率为：", end='')
+        print(classifier.score(x_test, y_test))
+        print("带权重的测试集准确率为：", end='')
+        print(classifier.score(x_test, y_test, test_sample_weight))
+        accuracy, precision, recall, f1 = evaluating_indicator(y_pred, y_test)
+        # utils.plot_decision_function(x_train, y_train, classifier)
+        for kv in precision.items():
+            print(kv)
+        for kv in recall.items():
+            print(kv)
+        for kv in f1.items():
+            print(kv)
+
+
+def xgboost(x_train, x_test, y_train, y_test, class_weight, sample_weight, test_sample_weight):
+
+    # 样本权重
+
+    if class_weight:
+
+        classifier = LGBMClassifier(
+            learning_rate=0.0075,
+            max_depth=7,
+            n_estimators=2048,
+            num_leaves=63,
+            random_state=2019,
+            n_jobs=-1,
+            reg_alpha=0.8,
+            reg_lambda=0.8,
+            subsample=0.2,
+            colsample_bytree=0.5,
+            class_weight=class_weight
+        )
+        classifier.fit(x_train, y_train)
+        y_pred = classifier.predict(x_test)
+        accuracy, precision, recall, f1 = evaluating_indicator(y_pred, y_test)
+        # utils.plot_decision_function(x_train, y_train, classifier)
+        for kv in accuracy.items():
+            print(kv)
+        for kv in precision.items():
+            print(kv)
+        for kv in recall.items():
+            print(kv)
+        for kv in f1.items():
+            print(kv)
+
+    if (sample_weight is not None) and (sample_weight.size != 0):
+        classifier = LGBMClassifier(
+            learning_rate=0.0075,
+            max_depth=7,
+            n_estimators=2048,
+            num_leaves=63,
+            random_state=2019,
+            n_jobs=-1,
+            reg_alpha=0.8,
+            reg_lambda=0.8,
+            subsample=0.2,
+            colsample_bytree=0.5,
+            # class_weight=class_weight
+        )
+        classifier.fit(x_train, y_train, sample_weight)
+        y_pred = classifier.predict(x_test)
+        print("不带权重的测试集准确率为：", end='')
+        print(classifier.score(x_test, y_test))
+        print("带权重的测试集准确率为：", end='')
+        print(classifier.score(x_test, y_test, test_sample_weight))
+        accuracy, precision, recall, f1 = evaluating_indicator(y_pred, y_test)
+        # utils.plot_decision_function(x_train, y_train, classifier)
+        for kv in precision.items():
+            print(kv)
+        for kv in recall.items():
+            print(kv)
+        for kv in f1.items():
+            print(kv)
