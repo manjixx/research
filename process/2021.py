@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
     fieldnames = ['no', 'gender', 'age', 'height', 'weight', 'bmi',
                   'preference', 'sensitivity', 'environment', 'griffith',
-                  'thermal sensation', 'thermal comfort ', 'thermal preference',
+                  'thermal sensation', 'thermal comfort', 'thermal preference',
                   'season', 'date', 'time', 'room', 'ta', 'hr']
 
     write_header('../dataset/2021.csv', fieldnames)
