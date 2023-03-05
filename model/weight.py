@@ -50,9 +50,9 @@ def sample_weight(data):
     weight = []
 
     for i in range(0, data.shape[0]):
-        sensitivity = np.array(data.iloc[i: i + 1, 8:9]).flatten()[0]  # 选取df的第i行和第9列
+        sensitivity = np.array(data.iloc[i: i + 1, 7:8]).flatten()[0]  # 选取df的第i行和第9列
 
-        g = np.array(data.iloc[i: i + 1, -1:]).flatten()[0]  # 选取df的第i行和第9列
+        g = np.array(data.iloc[i: i + 1, 9:10]).flatten()[0]  # 选取df的第i行和第9列
         if g <= 0.8:
             griffith = 0
         elif 0.8 < g < 1.2:
@@ -60,7 +60,7 @@ def sample_weight(data):
         elif g >= 1.2:
             griffith = 2
 
-        p = np.array(data.iloc[i:i + 1, 7:8]).flatten()[0]
+        p = np.array(data.iloc[i:i + 1, 6:7]).flatten()[0]
         if p == -1:
             preference = 0
         elif p == 0:

@@ -9,14 +9,12 @@ import warnings
 warnings.filterwarnings('ignore')  # "error", "ignore", "always", "default", "module" or "once"
 
 
-def read_data(file_path, synthetic, season, algorithm):
+def read_data(file_path, season, algorithm):
     data = pd.read_csv(file_path, encoding='gbk').dropna(axis=0, how='any', inplace=False)
     if season:
         data = data.loc[data['season'] == season]
-    if synthetic:
-        index = 'pmv'
-    else:
-        index = 'thermal sensation'
+
+    index = 'thermal sensation'
 
     if algorithm == 'svm':
         data.loc[(data[index] > 0.5), index] = 1

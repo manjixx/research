@@ -15,7 +15,7 @@ def read(file_path, season):
 
     data.dropna(axis=0, how='any', inplace=True)
 
-    if season == 'all' or season == 'synthetic':
+    if season == 'all':
         return data
     else:
         return data.loc[data['season'] == season]
@@ -35,8 +35,6 @@ def corr(df, index, count, season):
         name = '夏季'
     elif season == "winter":
         name = '冬季'
-    elif season == "synthetic":
-        name = "合成"
     elif season == "all":
         name = "全年"
 
@@ -56,11 +54,6 @@ def corr(df, index, count, season):
     # 选取相关性最强的6个
     most_correlated = df.corr().abs()[index].sort_values(ascending=False)
 
-    # if count:
-    #     most_correlated = most_correlated[count]
-    #     print(name + "数据集中各参数与" + index + "相关性最强的" + str(count) + "个参数为：")
-    #     print(most_correlated)
-    # else:
     print(name + "数据集中各参数与" + index + "相关性排序如下:")
     print(most_correlated)
 
@@ -79,7 +72,8 @@ def distribution(df, index, season):
     index_distribution.set_xlabel(index, fontsize=10)
     index_distribution.set_ylabel('density', fontsize=10)
     plt.grid(color='k', linestyle='--', linewidth=0.5)
-    # plt.savefig('./result/distribution/distribution plot of' + index + "in " + season + " dataset", dpi=200, bbox_inches='tight')
+    # plt.savefig('./result/distribution/distribution plot of' + index + "in "
+    # + season + " dataset", dpi=200, bbox_inches='tight')
     plt.show()
 
 
@@ -98,11 +92,13 @@ def distribution_person(df, season):
 
         if len(data) != 0:
             pmv_distribution = sns.kdeplot(data['thermal sensation'], shade=True)
-            pmv_distribution.axes.set_title(('distribution plot of pmv for the {} \'th person in the ' + season + ' dataset').format(str(i)),
+            pmv_distribution.axes.set_title(('distribution plot of pmv for the {} \'th person in the '
+                                             + season + ' dataset').format(str(i)),
                                             fontsize=10)
             pmv_distribution.set_xlabel('pmv', fontsize=10)
             pmv_distribution.set_ylabel('count', fontsize=10)
-            # plt.savefig(('./result/person/distribution plot of pmv for the {} \'th person in the ' + season + ' dataset').format(str(i)),
+            # plt.savefig(('./result/person/distribution plot of pmv for the {} \'th person in the '
+            # + season + ' dataset').format(str(i)),
             #     dpi=200, bbox_inches='tight')
             plt.show()
 
@@ -132,18 +128,9 @@ def plot_all(data, season):
     :return:
     """
 
-    hot = []
-    cool = []
-    normal = []
-
-    if season == 'synthetic':
-        hot = data[(data['pmv'] > 0.5)]
-        cool = data[(data['pmv'] < -0.5)]
-        normal = data[(data['pmv'] <= 0.5) & (data['pmv'] >= -0.5)]
-    else:
-        hot = data[(data['pmv'] > 0.5)]
-        cool = data[(data['pmv'] < -0.5)]
-        normal = data[(data['pmv'] <= 0.5) & (data['pmv'] >= -0.5)]
+    hot = data[(data['thermal sensation'] > 0.5)]
+    cool = data[(data['thermal sensation'] < -0.5)]
+    normal = data[(data['thermal sensation'] <= 0.5) & (data['thermal sensation'] >= -0.5)]
 
     print("There are " + str(hot.shape[0]) + " pieces of hot complain in " + season + " dataset")
     print("There are " + str(cool.shape[0]) + " pieces of cool complain in " + season + " dataset")
@@ -202,14 +189,9 @@ def plot_bg(data, index, down, up, season):
     print(season + "数据集中" + str(down) + " < " + index + " < " + str(up) + "的数据共计" + str(mid.shape[0]) + "条！")
     print(season + "数据集中" + index + " >= " + str(up) + "的数据共计有" + str(high.shape[0]) + "条！")
 
-    if season == 'synthetic':
-        low = low[['pmv', 'ta', 'hr']]
-        mid = mid[['pmv', 'ta', 'hr']]
-        high = high[['pmv', 'ta', 'hr']]
-    else:    # 初始化数组
-        low = low[['thermal sensation', 'ta', 'hr']]
-        mid = mid[['thermal sensation', 'ta', 'hr']]
-        high = high[['thermal sensation', 'ta', 'hr']]
+    low = low[['thermal sensation', 'ta', 'hr']]
+    mid = mid[['thermal sensation', 'ta', 'hr']]
+    high = high[['thermal sensation', 'ta', 'hr']]
 
     arr = {'low': low,
            'mid': mid,

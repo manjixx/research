@@ -2,12 +2,10 @@ import numpy as np
 
 from model.models import *
 from model.weight import *
-from feature_select import *
 
 if __name__ == '__main__':
     file_path = "../dataset/2021.csv"
-    synthetic = False
-    index = 'preference'
+    index = 'bmi'
     x_features = ['bmi', 'sensitivity', 'preference', 'griffith', 'ta', 'hr', 'thermal comfort ', 'thermal preference']
     y_feature = ['thermal sensation']
 
@@ -16,7 +14,7 @@ if __name__ == '__main__':
     """
 
     print("算法：pmv")
-    data = read_data(file_path, synthetic=synthetic, season='summer', algorithm='pmv')
+    data = read_data(file_path, season='summer', algorithm='pmv')
     pmv(np.array(data[['ta', 'hr']]), np.array(data[y_feature]))
 
     weight = proportion(data, index=index)
@@ -27,7 +25,7 @@ if __name__ == '__main__':
     """
 
     print("算法：svm, 分类指标： " + index)
-    data = read_data(file_path, synthetic=synthetic, season='summer', algorithm='svm')
+    data = read_data(file_path, season='summer', algorithm='svm')
     x_train, y_train, x_test, y_test = split_svm_knn(
         data, algorithm='svm', index=index,
         x_feature=x_features, y_feature=y_feature,
@@ -48,7 +46,7 @@ if __name__ == '__main__':
 
     print("算法：knn, 分类指标:" + index)
 
-    data = read_data(file_path, synthetic=synthetic, season='summer', algorithm='knn')
+    data = read_data(file_path, season='summer', algorithm='knn')
     x_train, y_train, x_test, y_test = split_svm_knn(
         data, algorithm='knn', index=index,
         x_feature=x_features, y_feature=y_feature,
@@ -67,7 +65,7 @@ if __name__ == '__main__':
      ensemble 算法数据生成
     """
     # 获取集成学习数据集
-    data = read_data(file_path, synthetic=synthetic, season='summer', algorithm='ensemble')
+    data = read_data(file_path, season='summer', algorithm='ensemble')
 
     x_train_c, x_test_c, y_train_c, y_test_c, sample_weight_c, test_sample_weight_c = split_ensemble_wcs(
         data, index=index, x_feature=x_features,
@@ -91,7 +89,8 @@ if __name__ == '__main__':
     Random Forest
     """
     print("算法：random forest, 分类指标：" + index + "权重：类别权重")
-    class_weight = {0: weight[0], 1: weight[1], 2: weight[2]}
+    # class_weight = {0: weight[0], 1: weight[1], 2: weight[2]}
+    class_weight = {0: 1, 1: 1, 2: 1}
     random_forest(x_train_s, x_test_s, y_train_s, y_test_s, class_weight=class_weight,
                   sample_weight=None, test_sample_weight=None)
 
@@ -103,7 +102,8 @@ if __name__ == '__main__':
         xgboost
     """
     print("算法：xgboost,分类指标：" + index + "权重：类别权重")
-    class_weight = {0: weight[0], 1: weight[1], 2: weight[2]}
+    # class_weight = {0: weight[0], 1: weight[1], 2: weight[2]}
+    class_weight = {0: 1, 1: 1, 2: 1}
 
     xgboost(x_train_s, x_test_s, y_train_s, y_test_s,
             class_weight=class_weight,

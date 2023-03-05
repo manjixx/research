@@ -12,11 +12,11 @@ if __name__ == "__main__":
         print(df)
 
         # 查看各个参数与pmv投票间的相关性
-        corr(df, "pmv", 5, season)
+        corr(df, "thermal sensation", 5, season)
 
         # 查看全年pmv分布图并判断是否符合高斯分布
-        distribution(df, "pmv", season)
-        gauss(df, "pmv")
+        distribution(df, 'thermal sensation', season)
+        gauss(df, "thermal sensation")
 
         # 查看温度分布图并判断是否符合高斯分布
         distribution(df, "ta", season)

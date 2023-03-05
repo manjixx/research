@@ -52,8 +52,9 @@ def save(filepath, data, griffith):
             temp = data.iloc[i, 16]
             humid = data.iloc[i, 17]
             grif = round(griffith[no - 1], 2)
-            datalist = [no, gender, age, height, weight, bmi, season, preference, sensitivity, environment,
-                        date, time, room, thermal_sensation, thermal_comfort, thermal_preference, temp, humid, grif]
+            datalist = [no, gender, age, height, weight, bmi, preference, sensitivity, environment, grif,
+                        thermal_sensation, thermal_comfort, thermal_preference,
+                        season, date, time, room, temp, humid]
             print(datalist)
             csv_write = csv.writer(fs)
             csv_write.writerow(datalist)
@@ -82,10 +83,10 @@ if __name__ == "__main__":
         griffith:
     '''
 
-    fieldnames = ['no', 'gender', 'age', 'height', 'weight', 'bmi', 'season',
-                  'preference', 'sensitivity', 'environment', 'date', 'time', 'room',
+    fieldnames = ['no', 'gender', 'age', 'height', 'weight', 'bmi',
+                  'preference', 'sensitivity', 'environment', 'griffith',
                   'thermal sensation', 'thermal comfort ', 'thermal preference',
-                  'ta', 'hr', 'griffith']
+                  'season', 'date', 'time', 'room', 'ta', 'hr']
 
     write_header('../dataset/2021.csv', fieldnames)
 

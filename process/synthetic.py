@@ -43,7 +43,7 @@ def save(filepath, data, griffith):
                 hr = data.iloc[i, 8]
                 g = round(griffith[no - 1], 2)
                 pmv = data.iloc[i, 9]
-                datalist = [no, gender, age, height, weight, bmi, season, ta, hr, g, pmv]
+                datalist = [no, gender, age, height, weight, bmi, g, pmv, season, ta, hr]
                 print(datalist)
                 csv_write = csv.writer(fs)
                 csv_write.writerow(datalist)
@@ -52,16 +52,17 @@ def save(filepath, data, griffith):
 if __name__ == "__main__":
 
     # 读取原始数据
-    filepath = '../dataset/synthetic.csv'
+    filepath = '../dataset/synthetic_dataset.csv'
     df = read(filepath)
 
     # 计算格里菲斯常数
     griffiths = cal_griffith(df)
 
     # 写入新文件
-    fieldnames = ['no', 'gender', 'age', 'height', 'weight', 'bmi', 'season', 'ta', 'hr', 'griffith', 'pmv']
+    fieldnames = ['no', 'gender', 'age', 'height', 'weight', 'bmi', 'griffith',
+                  'thermal sensation', 'season', 'ta', 'hr']
 
-    write_header('../dataset/pmv.csv', fieldnames)
+    write_header('../dataset/synthetic.csv', fieldnames)
 
-    save('../dataset/pmv.csv', df, griffiths)
+    save('../dataset/synthetic.csv', df, griffiths)
 
