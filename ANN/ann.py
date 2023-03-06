@@ -23,9 +23,16 @@ def seed_tensorflow(seed=2022):
 
 
 def data_loader():
-    env = np.load('dataset/env.npy').astype(np.float32)
-    body = np.load('dataset/body.npy').astype(np.float32)
-    y = np.load('dataset/label.npy').astype(int)
+    env1 = np.load('dataset/env.npy').astype(np.float32)
+    env2 = np.load('synthetic/env.npy').astype(np.float32)
+    env = np.concatenate((env1, env2), axis=0)
+    body1 = np.load('dataset/body.npy').astype(np.float32)
+    body2 = np.load('synthetic/body.npy').astype(np.float32)
+    body = np.concatenate((body1, body2), axis=0)
+
+    y1 = np.load('dataset/label.npy').astype(int)
+    y2 = np.load('synthetic/label.npy').astype(int)
+    y = np.concatenate((y1, y2), axis=0)
     x = np.concatenate((env, body), axis=1)
     train_feature, test_feature, train_label, test_label = train_test_split(x, y, test_size=0.2)
 
@@ -168,7 +175,7 @@ def test():
     y_pred = model({'feature': test_feature}, training=False)
     print(y_pred)
     y_pred = np.argmax(y_pred, axis=1)
-    print(accuracy_score(y_pred,test_label))
+    print(accuracy_score(y_pred, test_label))
     # print("precision：")
     # print(precision_score(y_pred, test_label))
     # print("recall：")
