@@ -6,7 +6,7 @@ from model.weight import *
 if __name__ == '__main__':
     file_path = "../dataset/2021.csv"
     index = 'bmi'
-    x_features = ['bmi', 'sensitivity', 'preference', 'griffith', 'ta', 'hr', 'thermal comfort ', 'thermal preference']
+    x_features = ['bmi', 'sensitivity', 'preference', 'griffith', 'ta', 'hr', 'thermal comfort', 'thermal preference']
     y_feature = ['thermal sensation']
 
     """
