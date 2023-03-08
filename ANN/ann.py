@@ -24,14 +24,14 @@ def seed_tensorflow(seed=2022):
 
 def data_loader():
     env1 = np.load('dataset/env.npy').astype(np.float32)
-    env2 = np.load('synthetic/env.npy').astype(np.float32)
+    env2 = np.load('dataset/env.npy').astype(np.float32)
     env = np.concatenate((env1, env2), axis=0)
     body1 = np.load('dataset/body.npy').astype(np.float32)
-    body2 = np.load('synthetic/body.npy').astype(np.float32)
+    body2 = np.load('dataset/body.npy').astype(np.float32)
     body = np.concatenate((body1, body2), axis=0)
 
     y1 = np.load('dataset/label.npy').astype(int)
-    y2 = np.load('synthetic/label.npy').astype(int)
+    y2 = np.load('dataset/label.npy').astype(int)
     y = np.concatenate((y1, y2), axis=0)
     x = np.concatenate((env, body), axis=1)
     train_feature, test_feature, train_label, test_label = train_test_split(x, y, test_size=0.2)
@@ -81,7 +81,7 @@ class Classifier_Modeling(tf.keras.Model):
         M = self.drop(M, training=training)
         M = self.dense_M2(M)
 
-        environment = self.drop(environment, training=training)
+        data = self.drop(data, training=training)
         Tsk_input = self.drop(data, training=training)
         Tsk = tf.abs(self.dense_Tsk1(Tsk_input))
         Tsk_input = self.drop(data, training=training)
@@ -190,6 +190,6 @@ if __name__ == '__main__':
 
     model = Classifier_Modeling()
 
-    num_epochs, batch_size, learning_rate = 75, 16, 0.008
+    num_epochs, batch_size, learning_rate = 128, 32, 0.008
     train()
     test()
