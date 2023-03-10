@@ -1,0 +1,50 @@
+
+
+def MSE_loss(y_true, y_pred):
+    lambda_phy = 5
+    phy = []
+    loss = tf.keras.losses.mse(y_true, y_pred)
+
+    for i in range(len(y_pred) - 1):
+        if i == 0:
+            phy.append(y_pred[i])
+        else:
+            phy.append(-(y_pred[i + 1] - y_pred[i]))
+    PHY_loss = sum(tf.nn.relu(phy)) / len(phy)
+    loss = loss + lambda_phy * PHY_loss
+    # print(lambda_phy * PHY_loss)
+    # loss= tf.square(y_true-y_pred)
+    # loss = tf.reduce_mean(loss)
+    return loss
+
+
+def RMSE(y_true, y_pred):
+    mse = tf.keras.losses.mse(y_true, y_pred)
+    rmse = np.sqrt(mse)
+    return rmse
+
+
+def R2(y_true, y_pred):
+    r2 = r2_score(y_true, y_pred)
+    return r2
+
+def Classification_Accuracy(y_true, y_pred):
+    yc_true = []
+    yc_pred = []
+    for i in range(0, len(y_true)):
+        if y_true[i] > 0.5:
+            yc_true.append(2)
+        elif y_true[i] < -0.5:
+            yc_true.append(0)
+        else:
+            yc_true.append(1)
+
+    for i in range(0, len(y_pred)):
+        if y_pred[i] > 0.5:
+            yc_pred.append(2)
+        elif y_pred[i] < -0.5:
+            yc_pred.append(0)
+        else:
+            yc_pred.append(1)
+    return accuracy_score(yc_pred, y_true)
+
