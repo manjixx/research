@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     # 先用pandas读入csv
-    df = pd.read_csv('../dataset/synthetic.csv', encoding='gbk').dropna(axis=0, how='any', inplace=False)
+    df = pd.read_csv('../dataset/2021.csv', encoding='gbk').dropna(axis=0, how='any', inplace=False)
     data = df.loc[df['season'] == 'summer']
 
     # '''plot'''
@@ -46,7 +46,11 @@ if __name__ == '__main__':
     va = pd.DataFrame({'va': va})
 
     env_feature = ['ta', 'hr']
-    env = pd.DataFrame(MinMaxScaler().fit_transform(data[env_feature]))
+    scaler = MinMaxScaler()
+    env = pd.DataFrame(scaler.fit_transform(data[env_feature]))
+    print(scaler.data_max_)
+    print(scaler.data_min_)
+    print(scaler.data_range_)
     env_data = pd.concat([env, va], axis=1)
 
     '''body data'''
@@ -67,8 +71,8 @@ if __name__ == '__main__':
     # y = data[y_feature]
 
     '''save data'''
-    np.save('synthetic/env.npy', env_data)
-    np.save('synthetic/body.npy', body_data)
-    np.save('synthetic/label.npy', y)
+    np.save('dataset/env.npy', env_data)
+    np.save('dataset/body.npy', body)
+    np.save('dataset/label.npy', y)
 
 

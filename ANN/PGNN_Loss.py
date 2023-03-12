@@ -6,6 +6,8 @@ import numpy as np
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.preprocessing import MinMaxScaler
+
 
 
 def seed_tensorflow(seed=2022):
@@ -44,32 +46,69 @@ class Classifier_Modeling(tf.keras.Model):
         super(Classifier_Modeling, self).__init__()
         self.drop = tf.keras.layers.Dropout(rate=0.5)
 
-        self.dense_PMV1 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
+        self.dense_M1 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
+        self.dense_M2 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
+
+        self.dense_Tsk1 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
+        self.dense_Tsk2 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
+
+        self.dense_S1 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
+        self.dense_S2 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
+
+        self.dense_PMV1 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
         self.dense_PMV2 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
-        self.dense_PMV3 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
-        self.dense_PMV4 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
-        self.dense_PMV5 = tf.keras.layers.Dense(units=4, activation=tf.nn.leaky_relu)
-        self.dense_PMV6 = tf.keras.layers.Dense(units=3, activation=tf.nn.leaky_relu)
+        self.dense_PMV3 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
+        self.dense_PMV4 = tf.keras.layers.Dense(units=4, activation=tf.nn.leaky_relu)
+        self.dense_PMV5 = tf.keras.layers.Dense(units=3, activation=tf.nn.leaky_relu)
 
     def call(self, inputs, training=None, mask=None):
         data = inputs['feature']  # [ta, hr, va, gender, age, weight, height, bmi]
+        print('origin data')
+        MinMaxScaler().inverse_transform(data)
+        print(data)
+        body = data[:, 3:]  # [gender, age, weight, height, bmi]
+        environment = data[:, 0:3]  # [ta, hr, va]
+        T = data[:, 0:1]  # Ta
+        Pa = tf.math.log1p(T)
 
-        dense = self.drop(data, training=training)
-        dense = self.dense_PMV1(dense)
+        M_input = self.drop(body, training=training)
+        M = self.dense_M1(M_input)
+        M = self.drop(M, training=training)
+        M = self.dense_M2(M)
+
+        Tsk_input = self.drop(data, training=training)
+        Tsk = tf.abs(self.dense_Tsk1(Tsk_input))
+        Tsk_input = self.drop(Tsk, training=training)
+        Tsk = tf.abs(self.dense_Tsk2(Tsk_input))
+
+        Psk = tf.math.log1p(Tsk)
+
+        s_input = tf.concat([body, M, Tsk, Psk, environment, Pa], axis=1)
+        s_input = self.drop(s_input, training=training)
+        S = self.dense_S1(s_input)
+        s_input = self.drop(S, training=training)
+        S = self.dense_S2(s_input)
+
+        pmv_input = tf.concat([body, M, Tsk, Psk, environment, Pa, S], axis=1)
+        dense = self.dense_PMV1(pmv_input)
         dense = self.drop(dense, training=training)
         dense = self.dense_PMV2(dense)
-        # dense = self.drop(dense, training=training)
-        # dense = self.dense_PMV3(dense)
+        dense = self.drop(dense, training=training)
+        dense = self.dense_PMV3(dense)
         dense = self.drop(dense, training=training)
         dense = self.dense_PMV4(dense)
         dense = self.drop(dense, training=training)
         dense = self.dense_PMV5(dense)
-        dense = self.drop(dense, training=training)
-        dense = self.dense_PMV6(dense)
 
         output = tf.nn.softmax(dense)
 
         x = np.concatenate((data, output), axis=1)
+        print('data')
+        print(data)
+        print('type of x:')
+        print(type(x))
+        print('x :')
+        print(x)
 
         result = [data, output]
         return result
@@ -95,10 +134,7 @@ def R_loss(y_true, input):
     total = 0
     for i in range(0, len(y_true)):
         p_true = tf.reshape(1 - y_true[i], [1, 3])
-        print(y_true[i])
-        print(p_true)
         p_pred = tf.reshape(tf.math.log(alpha + y_pred[i]), [3, 1])
-        print(p_pred)
         r = tf.matmul(p_true, p_pred)
         total += r.numpy().item()
     r_loss = total / len(y_pred)

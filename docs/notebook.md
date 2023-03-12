@@ -108,6 +108,10 @@ knn报错`TypeError: '<' not supported between instances of 'str' and 'int'`
 - knn: k值确定
 - randomForest,x_feature
 
+> 2022-03-12
+
+- 更改数据反归一化位置，获取ta
+
 ## 三、数据筛选
 
 > **全年数据**
