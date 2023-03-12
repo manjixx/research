@@ -63,6 +63,7 @@ if __name__ == '__main__':
     data.loc[(data[y_feature] < -0.5), y_feature] = 0
 
     y = data[y_feature].values.astype(int)
+    print(y)
     # y = data[y_feature]
 
     '''save data'''

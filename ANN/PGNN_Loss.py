@@ -20,15 +20,15 @@ def seed_tensorflow(seed=2022):
 
 
 def data_loader():
-    env1 = np.load('synthetic/env.npy').astype(np.float32)
-    env2 = np.load('synthetic/env.npy').astype(np.float32)
+    env1 = np.load('dataset/env.npy').astype(np.float32)
+    env2 = np.load('dataset/env.npy').astype(np.float32)
     env = np.concatenate((env1, env2), axis=0)
-    body1 = np.load('synthetic/body.npy').astype(np.float32)
-    body2 = np.load('synthetic/body.npy').astype(np.float32)
+    body1 = np.load('dataset/body.npy').astype(np.float32)
+    body2 = np.load('dataset/body.npy').astype(np.float32)
     body = np.concatenate((body1, body2), axis=0)
 
-    y1 = np.load('synthetic/label.npy').astype(int)
-    y2 = np.load('synthetic/label.npy').astype(int)
+    y1 = np.load('dataset/label.npy').astype(int)
+    y2 = np.load('dataset/label.npy').astype(int)
     y = np.concatenate((y1, y2), axis=0)
     x = np.concatenate((env, body), axis=1)
     train_feature, test_feature, train_label, test_label = train_test_split(x, y, test_size=0.2)
@@ -45,16 +45,11 @@ class Classifier_Modeling(tf.keras.Model):
         self.drop = tf.keras.layers.Dropout(rate=0.5)
 
         self.dense_PMV1 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
-        self.dense_PMV2 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
-        self.dense_PMV3 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
+        self.dense_PMV2 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
+        self.dense_PMV3 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
         self.dense_PMV4 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
-        self.dense_PMV5 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
-        self.dense_PMV6 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
-        self.dense_PMV7 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
-        self.dense_PMV8 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
-        self.dense_PMV9 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
-        self.dense_PMV10 = tf.keras.layers.Dense(units=4, activation=tf.nn.leaky_relu)
-        self.dense_PMV11 = tf.keras.layers.Dense(units=3, activation=tf.nn.leaky_relu)
+        self.dense_PMV5 = tf.keras.layers.Dense(units=4, activation=tf.nn.leaky_relu)
+        self.dense_PMV6 = tf.keras.layers.Dense(units=3, activation=tf.nn.leaky_relu)
 
     def call(self, inputs, training=None, mask=None):
         data = inputs['feature']  # [ta, hr, va, gender, age, weight, height, bmi]
@@ -63,30 +58,27 @@ class Classifier_Modeling(tf.keras.Model):
         dense = self.dense_PMV1(dense)
         dense = self.drop(dense, training=training)
         dense = self.dense_PMV2(dense)
-        dense = self.drop(dense, training=training)
-        dense = self.dense_PMV3(dense)
+        # dense = self.drop(dense, training=training)
+        # dense = self.dense_PMV3(dense)
         dense = self.drop(dense, training=training)
         dense = self.dense_PMV4(dense)
         dense = self.drop(dense, training=training)
         dense = self.dense_PMV5(dense)
         dense = self.drop(dense, training=training)
         dense = self.dense_PMV6(dense)
-        dense = self.drop(dense, training=training)
-        dense = self.dense_PMV7(dense)
-        dense = self.drop(dense, training=training)
-        dense = self.dense_PMV8(dense)
-        dense = self.drop(dense, training=training)
-        dense = self.dense_PMV9(dense)
-        dense = self.drop(dense, training=training)
-        dense = self.dense_PMV10(dense)
-        dense = self.drop(dense, training=training)
-        dense = self.dense_PMV11(dense)
 
         output = tf.nn.softmax(dense)
         return output
 
     def get_embedding(self):
         return self.embedding.get_weights()
+
+
+def get_Batch(data, label, batch_size):
+    print(data.shape, label.shape)
+    input_queue = tf.train.slice_input_producer([data, label], num_epochs=1, shuffle=True, capacity=32 )
+    x_batch, y_batch = tf.train.batch(input_queue, batch_size=batch_size, num_threads=1, capacity=32, allow_smaller_final_batch=False)
+    return x_batch, y_batch
 
 
 def MSE_loss(y_true, y_pred):
@@ -100,12 +92,15 @@ def CE_double_loss(y_true, y_pred):
     ce_loss = tf.reduce_mean(ce_loss)
     y_true = tf.cast(y_true, dtype=tf.int32)
     y_true = tf.one_hot(y_true, depth=tf.shape(y_pred)[-1])
-    alpha = 0.01
-    beta = 1.5
+    alpha = 0.1
+    beta = 0
     total = 0
     for i in range(0, len(y_pred)):
         p_true = tf.reshape(1 - y_true[i], [1, 3])
+        print(y_true[i])
+        print(p_true)
         p_pred = tf.reshape(tf.math.log(alpha + y_pred[i]), [3, 1])
+        print(p_pred)
         r = tf.matmul(p_true, p_pred)
         total += r.numpy().item()
     r_loss = total / len(y_pred)
@@ -127,9 +122,9 @@ def Accuracy(y_true, y_pred):
 
 def train():
     optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
-    metrics = [CE_loss, Accuracy]
-    loss = [CE_loss]
-    earlyStop = tf.keras.callbacks.EarlyStopping(monitor='CE_loss', min_delta=0.0001, patience=100, verbose=1,
+    metrics = [CE_double_loss, Accuracy]
+    loss = [CE_double_loss]
+    earlyStop = tf.keras.callbacks.EarlyStopping(monitor='CE_double_loss', min_delta=0.0001, patience=10, verbose=1,
                                                  mode='min', restore_best_weights=True)
     callbacks = [earlyStop]
     tf.config.experimental_run_functions_eagerly(True)
