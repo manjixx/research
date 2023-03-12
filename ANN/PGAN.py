@@ -170,6 +170,7 @@ def test():
 
 if __name__ == '__main__':
     seed_tensorflow(2022)
+
     train_feature, test_feature, train_label, test_label = data_loader()
 
     model = Classifier_Modeling()

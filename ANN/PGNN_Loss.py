@@ -118,6 +118,7 @@ class Classifier_Modeling(tf.keras.Model):
 
 
 def R_loss(y_true, input):
+    scaler.inverse_transform()
     ta = input['ta']
     y = []
     # ta 映射
@@ -188,7 +189,7 @@ def test():
 if __name__ == '__main__':
     seed_tensorflow(2022)
     train_feature, test_feature, train_label, test_label = data_loader()
-
+    scaler = MinMaxScaler()
     model = Classifier_Modeling()
 
     num_epochs, batch_size, learning_rate = 128, 32, 0.008
