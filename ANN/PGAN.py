@@ -20,14 +20,14 @@ def seed_tensorflow(seed=2022):
 
 
 def data_loader():
-    env1 = np.load('synthetic/env.npy').astype(np.float32)
+    env1 = np.load('dataset/env.npy').astype(np.float32)
     env2 = np.load('synthetic/env.npy').astype(np.float32)
     env = np.concatenate((env1, env2), axis=0)
-    body1 = np.load('synthetic/body.npy').astype(np.float32)
+    body1 = np.load('dataset/body.npy').astype(np.float32)
     body2 = np.load('synthetic/body.npy').astype(np.float32)
     body = np.concatenate((body1, body2), axis=0)
 
-    y1 = np.load('synthetic/label.npy').astype(int)
+    y1 = np.load('dataset/label.npy').astype(int)
     y2 = np.load('synthetic/label.npy').astype(int)
     y = np.concatenate((y1, y2), axis=0)
     x = np.concatenate((env, body), axis=1)
@@ -114,7 +114,7 @@ def CE_double_loss(y_true, y_pred):
     y_true = tf.cast(y_true, dtype=tf.int32)
     y_true = tf.one_hot(y_true, depth=tf.shape(y_pred)[-1])
     alpha = 1
-    beta = 0.5
+    beta = 0.3
     total = 0
     for i in range(0, len(y_pred)):
         p_true = tf.reshape(y_true[i], [1, 3])
@@ -140,9 +140,9 @@ def Accuracy(y_true, y_pred):
 
 def train():
     optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
-    metrics = [CE_loss, Accuracy]
-    loss = [CE_loss]
-    earlyStop = tf.keras.callbacks.EarlyStopping(monitor='CE_loss', min_delta=0.0001, patience=10, verbose=1,
+    metrics = [CE_double_loss, Accuracy]
+    loss = [CE_double_loss]
+    earlyStop = tf.keras.callbacks.EarlyStopping(monitor='CE_double_loss', min_delta=0.0001, patience=10, verbose=1,
                                                  mode='min', restore_best_weights=True)
     callbacks = [earlyStop]
     tf.config.experimental_run_functions_eagerly(True)

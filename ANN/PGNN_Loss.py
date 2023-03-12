@@ -68,34 +68,32 @@ class Classifier_Modeling(tf.keras.Model):
         dense = self.dense_PMV6(dense)
 
         output = tf.nn.softmax(dense)
-        return output
+
+        x = np.concatenate((data, output), axis=1)
+
+        result = [data, output]
+        return result
 
     def get_embedding(self):
         return self.embedding.get_weights()
 
 
-def get_Batch(data, label, batch_size):
-    print(data.shape, label.shape)
-    input_queue = tf.train.slice_input_producer([data, label], num_epochs=1, shuffle=True, capacity=32 )
-    x_batch, y_batch = tf.train.batch(input_queue, batch_size=batch_size, num_threads=1, capacity=32, allow_smaller_final_batch=False)
-    return x_batch, y_batch
-
-
-def MSE_loss(y_true, y_pred):
-    loss = tf.keras.losses.mse(y_true, y_pred)
-    return loss
-
-
-def CE_double_loss(y_true, y_pred):
-    ce_sparse = tf.keras.losses.SparseCategoricalCrossentropy()
-    ce_loss = ce_sparse(y_true, y_pred)
-    ce_loss = tf.reduce_mean(ce_loss)
-    y_true = tf.cast(y_true, dtype=tf.int32)
-    y_true = tf.one_hot(y_true, depth=tf.shape(y_pred)[-1])
+def R_loss(y_true, input):
+    ta = input['ta']
+    y = []
+    # ta 映射
+    for i in range(0, len(ta)):
+        if 28 >= ta[i] >= 26:
+            y.append(1)
+        elif ta[i] < 26:
+            y.append(0)
+        else:
+            y.append(2)
+    y_ideal = tf.one_hot(y, depth=3)
     alpha = 0.1
     beta = 0
     total = 0
-    for i in range(0, len(y_pred)):
+    for i in range(0, len(y_true)):
         p_true = tf.reshape(1 - y_true[i], [1, 3])
         print(y_true[i])
         print(p_true)
@@ -122,9 +120,9 @@ def Accuracy(y_true, y_pred):
 
 def train():
     optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
-    metrics = [CE_double_loss, Accuracy]
-    loss = [CE_double_loss]
-    earlyStop = tf.keras.callbacks.EarlyStopping(monitor='CE_double_loss', min_delta=0.0001, patience=10, verbose=1,
+    metrics = [Accuracy]
+    loss = [CE_loss, R_loss]
+    earlyStop = tf.keras.callbacks.EarlyStopping(monitor='loss', min_delta=0.0001, patience=10, verbose=1,
                                                  mode='min', restore_best_weights=True)
     callbacks = [earlyStop]
     tf.config.experimental_run_functions_eagerly(True)

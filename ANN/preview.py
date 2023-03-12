@@ -68,21 +68,20 @@ if __name__ == '__main__':
         com_hr = data[(data['thermal sensation'] == 1)][['hr']]
 
         # hot_ta.hist(color='r')
-        com_ta.hist(color='g')
+        # com_ta.hist(color='g')
 
         # cool_ta.hist(color='b')
 
-        # # 绘制分布图
-        # plt.figure(figsize=(8, 5), dpi=80)
-        # axes = plt.subplot(111)
-        # label1 = axes.scatter(hot_ta, hot_hr, s=50, marker=None, c="red")
-        # label2 = axes.scatter(cool_ta, cool_hr, s=50, marker='x', c="blue")
-        # label3 = axes.scatter(com_ta, com_hr, s=50, marker='+', c="green")
-        # plt.title(n)
-        # plt.xlabel("temp(℃)")
-        # plt.ylabel("humid(%)")
-        # axes.legend((label1, label2, label3), ("hot", "cool", "comfort"), loc=3)
-        # plt.savefig('./result/pic/feedback distribution plot in ' + season + 'dataset.png')
+        # 绘制分布图
+        plt.figure(figsize=(8, 5), dpi=80)
+        axes = plt.subplot(111)
+        label1 = axes.scatter(hot_ta, hot_hr, s=50, marker=None, c="red")
+        label2 = axes.scatter(cool_ta, cool_hr, s=50, marker='x', c="blue")
+        label3 = axes.scatter(com_ta, com_hr, s=50, marker='+', c="green")
+        plt.title(n)
+        plt.xlabel("temp(℃)")
+        plt.ylabel("humid(%)")
+        axes.legend((label1, label2, label3), ("hot", "cool", "comfort"), loc=3)
         plt.show()
 
     for key, value in len.items():
