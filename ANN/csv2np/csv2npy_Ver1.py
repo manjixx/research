@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 @Project ：data- mechanism 
-@File ：csv2npy.py
+@File ：csv2npy_Ver1.py
 @Author ：伍陆柒
 @Desc ：
 @Date ：2023/3/5 20:18 
@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     # 先用pandas读入csv
-    df = pd.read_csv('../dataset/2021.csv', encoding='gbk').dropna(axis=0, how='any', inplace=False)
+    df = pd.read_csv('../../dataset/2021.csv', encoding='gbk').dropna(axis=0, how='any', inplace=False)
     data = df.loc[df['season'] == 'summer']
 
     # '''plot'''
@@ -48,9 +48,6 @@ if __name__ == '__main__':
     env_feature = ['ta', 'hr']
     scaler = MinMaxScaler()
     env = pd.DataFrame(scaler.fit_transform(data[env_feature]))
-    print(scaler.data_max_)
-    print(scaler.data_min_)
-    print(scaler.data_range_)
     env_data = pd.concat([env, va], axis=1)
 
     '''body data'''
@@ -71,8 +68,8 @@ if __name__ == '__main__':
     # y = data[y_feature]
 
     '''save data'''
-    np.save('dataset/env.npy', env_data)
-    np.save('dataset/body.npy', body)
-    np.save('dataset/label.npy', y)
+    np.save('../dataset/experimental_v1/env.npy', env_data)
+    np.save('../dataset/experimental_v1/body.npy', body)
+    np.save('../dataset/experimental_v1/label.npy', y)
 
 

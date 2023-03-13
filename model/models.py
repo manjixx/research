@@ -108,7 +108,7 @@ def knn(x_train, y_train, x_test, y_test, weights, distance):
                 weights='uniform',
                 algorithm='auto',
                 leaf_size=30,
-                p=2,
+                # p=2,
                 metric=getattr(dis, d),
                 metric_params=None,
                 n_jobs=None

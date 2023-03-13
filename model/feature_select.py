@@ -37,7 +37,7 @@ def feature_importance(x_train, y_train):
     plt.legend()
     plt.show()
 
-    # data = read_data(file_path, synthetic=synthetic, season='summer',
+    # data = read_data(file_path, synthetic_v1=synthetic_v1, season='summer',
     #                  algorithm='other')
     #
     # x = data[['gender', 'age', 'height', 'weight', 'bmi', 'preference',

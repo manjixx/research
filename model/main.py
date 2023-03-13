@@ -5,7 +5,7 @@ from model.weight import *
 
 if __name__ == '__main__':
     file_path = "../dataset/2021.csv"
-    index = 'bmi'
+    index = 'preference'
     x_features = ['bmi', 'sensitivity', 'preference', 'griffith', 'ta', 'hr', 'thermal comfort', 'thermal preference']
     y_feature = ['thermal sensation']
 
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     print("算法：adaboost，分类指标：" + index + "，权重：类别权重")
     adaboost(x_train_c, x_test_c, y_train_c, y_test_c, sample_weight_c, test_sample_weight_c)
 
-    print("算法：adaboost，分类指标：bmi，权重：人员权重")
+    print("算法：adaboost，分类指标：" + index + "，权重：人员权重")
     adaboost(x_train_s, x_test_s, y_train_s, y_test_s, sample_weight_s, test_sample_weight_s)
 
     """

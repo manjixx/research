@@ -20,15 +20,15 @@ def seed_tensorflow(seed=2022):
 
 
 def data_loader():
-    env1 = np.load('dataset/env.npy').astype(np.float32)
-    env2 = np.load('synthetic/env.npy').astype(np.float32)
+    env1 = np.load('./dataset/experimental_v1/env.npy').astype(np.float32)
+    env2 = np.load('./dataset/experimental_v1/env.npy').astype(np.float32)
     env = np.concatenate((env1, env2), axis=0)
-    body1 = np.load('dataset/body.npy').astype(np.float32)
-    body2 = np.load('synthetic/body.npy').astype(np.float32)
+    body1 = np.load('./dataset/experimental_v1/body.npy').astype(np.float32)
+    body2 = np.load('./dataset/experimental_v1/body.npy').astype(np.float32)
     body = np.concatenate((body1, body2), axis=0)
 
-    y1 = np.load('dataset/label.npy').astype(int)
-    y2 = np.load('synthetic/label.npy').astype(int)
+    y1 = np.load('./dataset/experimental_v1/label.npy').astype(int)
+    y2 = np.load('./dataset/experimental_v1/label.npy').astype(int)
     y = np.concatenate((y1, y2), axis=0)
     x = np.concatenate((env, body), axis=1)
     train_feature, test_feature, train_label, test_label = train_test_split(x, y, test_size=0.2)
@@ -107,25 +107,6 @@ def MSE_loss(y_true, y_pred):
     return loss
 
 
-def CE_double_loss(y_true, y_pred):
-    ce_sparse = tf.keras.losses.SparseCategoricalCrossentropy()
-    ce_loss = ce_sparse(y_true, y_pred)
-    ce_loss = tf.reduce_mean(ce_loss)
-    y_true = tf.cast(y_true, dtype=tf.int32)
-    y_true = tf.one_hot(y_true, depth=tf.shape(y_pred)[-1])
-    alpha = 1
-    beta = 0.3
-    total = 0
-    for i in range(0, len(y_pred)):
-        p_true = tf.reshape(y_true[i], [1, 3])
-        p_pred = tf.reshape(tf.math.log(alpha + y_pred[i]), [3, 1])
-        r = tf.matmul(p_true, p_pred)
-        total += r.numpy().item()
-    r_loss = total / len(y_pred)
-    loss = ce_loss + beta * r_loss
-    return loss
-
-
 def CE_loss(y_true, y_pred):
     ce_sparse = tf.keras.losses.SparseCategoricalCrossentropy()
     loss = ce_sparse(y_true, y_pred)
@@ -140,9 +121,9 @@ def Accuracy(y_true, y_pred):
 
 def train():
     optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
-    metrics = [CE_double_loss, Accuracy]
-    loss = [CE_double_loss]
-    earlyStop = tf.keras.callbacks.EarlyStopping(monitor='CE_double_loss', min_delta=0.0001, patience=10, verbose=1,
+    metrics = [CE_loss, Accuracy]
+    loss = [CE_loss]
+    earlyStop = tf.keras.callbacks.EarlyStopping(monitor='CE_loss', min_delta=0.0001, patience=10, verbose=1,
                                                  mode='min', restore_best_weights=True)
     callbacks = [earlyStop]
     tf.config.experimental_run_functions_eagerly(True)
@@ -166,7 +147,11 @@ def test():
     y_pred = model({'feature': test_feature}, training=False)
     print(y_pred)
     y_pred = np.argmax(y_pred, axis=1)
-    print(accuracy_score(y_pred, test_label))
+    print('准确率：' + str(accuracy_score(y_pred, test_label)))
+    print('精确率：' + str(precision_score(y_pred, test_label)))
+    print('Recall：' + str(recall_score(y_pred, test_label)))
+    print('F1-score：' + str(f1_score(y_pred, test_label)))
+
 
 if __name__ == '__main__':
     seed_tensorflow(2022)

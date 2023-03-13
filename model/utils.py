@@ -41,10 +41,10 @@ def split_by_index(data, index, x_feature, y_feature):
     elif index == 'griffith':
         low_x = data[(data[index] <= 0.8)][x_feature]
         low_y = data[(data[index] <= 0.8)][y_feature]
-        mid_x = data[(data[index] < 1.2) & (data[index] > 0.8)][x_feature]
-        mid_y = data[(data[index] < 1.2) & (data[index] > 0.8)][y_feature]
-        high_x = data[(data[index] >= 1.2)][x_feature]
-        high_y = data[(data[index] >= 1.2)][y_feature]
+        mid_x = data[(data[index] < 1.5) & (data[index] > 0.8)][x_feature]
+        mid_y = data[(data[index] < 1.5) & (data[index] > 0.8)][y_feature]
+        high_x = data[(data[index] >= 1.5)][x_feature]
+        high_y = data[(data[index] >= 1.5)][y_feature]
     elif index == 'preference':
         low_x = data[(data[index] == -1)][x_feature]
         low_y = data[(data[index] == -1)][y_feature]

@@ -8,7 +8,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.preprocessing import MinMaxScaler
 
-
 def seed_tensorflow(seed=2022):
     tf.get_logger().setLevel('ERROR')
     random.seed(seed)
@@ -22,6 +21,7 @@ def seed_tensorflow(seed=2022):
 
 def data_loader():
 
+    # env and body
     env1 = np.load('./dataset/experimental_v2/env.npy').astype(np.float32)
     env2 = np.load('./dataset/experimental_v2/env.npy').astype(np.float32)
     env = np.concatenate((env1, env2), axis=0)
@@ -32,7 +32,6 @@ def data_loader():
     gender2 = np.load('./dataset/experimental_v2/gender.npy').astype(int)
     gender = np.concatenate((gender1, gender2), axis=0)
 
-
     # normalization
     x = np.concatenate((env, body), axis=1)
     x = scaler.fit_transform(x)
@@ -41,8 +40,8 @@ def data_loader():
     x = np.concatenate((x, gender[:, None]), axis=1)
 
     # label
-    y1 = np.load('./dataset/experimental_v2/label.npy').astype(int)
-    y2 = np.load('./dataset/experimental_v2/label.npy').astype(int)
+    y1 = np.load('dataset/experimental_v2/label.npy').astype(int)
+    y2 = np.load('dataset/experimental_v2/label.npy').astype(int)
     y = np.concatenate((y1, y2), axis=0)
 
     # split train test
@@ -59,48 +58,25 @@ class Classifier_Modeling(tf.keras.Model):
         super(Classifier_Modeling, self).__init__()
         self.drop = tf.keras.layers.Dropout(rate=0.5)
 
-        self.dense_M1 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
-        self.dense_M2 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
-
-        self.dense_Tsk1 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
-        self.dense_Tsk2 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
-
-        self.dense_S1 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
-        self.dense_S2 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
-
-        self.dense_PMV1 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
-        self.dense_PMV2 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
+        self.dense_PMV1 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
+        self.dense_PMV2 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
         self.dense_PMV3 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
-        self.dense_PMV4 = tf.keras.layers.Dense(units=4, activation=tf.nn.leaky_relu)
-        self.dense_PMV5 = tf.keras.layers.Dense(units=3, activation=tf.nn.leaky_relu)
+        self.dense_PMV4 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
+        self.dense_PMV5 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
+        self.dense_PMV6 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
+        self.dense_PMV7 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
+        self.dense_PMV8 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
+        self.dense_PMV9 = tf.keras.layers.Dense(units=32, activation=tf.nn.leaky_relu)
+        self.dense_PMV10 = tf.keras.layers.Dense(units=16, activation=tf.nn.leaky_relu)
+        self.dense_PMV11 = tf.keras.layers.Dense(units=8, activation=tf.nn.leaky_relu)
+        self.dense_PMV12 = tf.keras.layers.Dense(units=4, activation=tf.nn.leaky_relu)
+        self.dense_PMV13 = tf.keras.layers.Dense(units=3, activation=tf.nn.leaky_relu)
 
     def call(self, inputs, training=None, mask=None):
-        data = inputs['feature']  # [ta, hr, va, age, weight, height, bmi, gender]
-        body = data[:, 3:]  # [gender, age, weight, height, bmi]
-        environment = data[:, 0:3]  # [ta, hr, va]
-        T = data[:, 0:1]  # Ta
-        Pa = tf.math.log1p(T)
+        data = inputs['feature']  # [ta, hr, va, gender, age, weight, height, bmi]
 
-        M_input = self.drop(body, training=training)
-        M = self.dense_M1(M_input)
-        M = self.drop(M, training=training)
-        M = self.dense_M2(M)
-
-        Tsk_input = self.drop(data, training=training)
-        Tsk = tf.abs(self.dense_Tsk1(Tsk_input))
-        Tsk_input = self.drop(Tsk, training=training)
-        Tsk = tf.abs(self.dense_Tsk2(Tsk_input))
-
-        Psk = tf.math.log1p(Tsk)
-
-        s_input = tf.concat([body, M, Tsk, Psk, environment, Pa], axis=1)
-        s_input = self.drop(s_input, training=training)
-        S = self.dense_S1(s_input)
-        s_input = self.drop(S, training=training)
-        S = self.dense_S2(s_input)
-
-        pmv_input = tf.concat([body, M, Tsk, Psk, environment, Pa, S], axis=1)
-        dense = self.dense_PMV1(pmv_input)
+        dense = self.drop(data, training=training)
+        dense = self.dense_PMV1(dense)
         dense = self.drop(dense, training=training)
         dense = self.dense_PMV2(dense)
         dense = self.drop(dense, training=training)
@@ -109,7 +85,22 @@ class Classifier_Modeling(tf.keras.Model):
         dense = self.dense_PMV4(dense)
         dense = self.drop(dense, training=training)
         dense = self.dense_PMV5(dense)
-
+        dense = self.drop(dense, training=training)
+        dense = self.dense_PMV6(dense)
+        dense = self.drop(dense, training=training)
+        dense = self.dense_PMV7(dense)
+        dense = self.drop(dense, training=training)
+        dense = self.dense_PMV8(dense)
+        dense = self.drop(dense, training=training)
+        dense = self.dense_PMV9(dense)
+        dense = self.drop(dense, training=training)
+        dense = self.dense_PMV10(dense)
+        dense = self.drop(dense, training=training)
+        dense = self.dense_PMV11(dense)
+        dense = self.drop(dense, training=training)
+        dense = self.dense_PMV12(dense)
+        dense = self.drop(dense, training=training)
+        dense = self.dense_PMV13(dense)
         output = tf.nn.softmax(dense)
         x = tf.concat((data, output), axis=1)
         return [output, x]
@@ -158,7 +149,7 @@ def train():
     optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
     metrics = [Accuracy]
     loss = [CE_loss, R_loss]
-    earlyStop = tf.keras.callbacks.EarlyStopping(monitor='loss', min_delta=0.0001, patience=10, verbose=1,
+    earlyStop = tf.keras.callbacks.EarlyStopping(monitor='loss', min_delta=0.0001, patience=100, verbose=1,
                                                  mode='min', restore_best_weights=True)
     callbacks = [earlyStop]
     tf.config.experimental_run_functions_eagerly(True)
@@ -192,9 +183,10 @@ if __name__ == '__main__':
     scaler = MinMaxScaler()
 
     train_feature, test_feature, train_label, test_label = data_loader()
+
     model = Classifier_Modeling()
     alpha, beta = 0.3, 1
-    num_epochs, batch_size, learning_rate = 128, 32, 0.008
 
+    num_epochs, batch_size, learning_rate = 128, 32, 0.008
     train()
     test()

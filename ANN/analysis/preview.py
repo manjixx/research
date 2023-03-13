@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 @Project ：data- mechanism
-@File ：csv2npy.py
+@File ：csv2npy_Ver1.py
 @Author ：伍陆柒
 @Desc ：
 @Date ：2023/3/5 20:18
@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     # 先用pandas读入csv
-    df = pd.read_csv('../dataset/2021.csv', encoding='gbk').dropna(axis=0, how='any', inplace=False)
+    df = pd.read_csv('../../dataset/2021.csv', encoding='gbk').dropna(axis=0, how='any', inplace=False)
     df = df.loc[df['season'] == 'summer']
 
     no = np.array(df['no'].unique())
