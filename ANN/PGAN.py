@@ -21,14 +21,14 @@ def seed_tensorflow(seed=2022):
 
 def data_loader():
     env1 = np.load('./dataset/experimental_v1/env.npy').astype(np.float32)
-    env2 = np.load('./dataset/experimental_v1/env.npy').astype(np.float32)
+    env2 = np.load('./dataset/synthetic_v1/env.npy').astype(np.float32)
     env = np.concatenate((env1, env2), axis=0)
     body1 = np.load('./dataset/experimental_v1/body.npy').astype(np.float32)
-    body2 = np.load('./dataset/experimental_v1/body.npy').astype(np.float32)
+    body2 = np.load('./dataset/synthetic_v1/body.npy').astype(np.float32)
     body = np.concatenate((body1, body2), axis=0)
 
     y1 = np.load('./dataset/experimental_v1/label.npy').astype(int)
-    y2 = np.load('./dataset/experimental_v1/label.npy').astype(int)
+    y2 = np.load('./dataset/synthetic_v1/label.npy').astype(int)
     y = np.concatenate((y1, y2), axis=0)
     x = np.concatenate((env, body), axis=1)
     train_feature, test_feature, train_label, test_label = train_test_split(x, y, test_size=0.2)
@@ -148,9 +148,15 @@ def test():
     print(y_pred)
     y_pred = np.argmax(y_pred, axis=1)
     print('准确率：' + str(accuracy_score(y_pred, test_label)))
-    print('精确率：' + str(precision_score(y_pred, test_label)))
-    print('Recall：' + str(recall_score(y_pred, test_label)))
-    print('F1-score：' + str(f1_score(y_pred, test_label)))
+    print('精确率 macro：' + str(precision_score(y_pred, test_label, average='macro')))
+    print('精确率 micro：' + str(precision_score(y_pred, test_label, average='micro')))
+    print('精确率 weighted：' + str(precision_score(y_pred, test_label, average='weighted')))
+    print('Recall macro：' + str(recall_score(y_pred, test_label, average='macro')))
+    print('Recall micro：' + str(recall_score(y_pred, test_label, average='micro')))
+    print('Recall weighted：' + str(recall_score(y_pred, test_label, average='weighted')))
+    print('F1-score macro：' + str(f1_score(y_pred, test_label, average='macro')))
+    print('F1-score micro：' + str(f1_score(y_pred, test_label, average='micro')))
+    print('F1-score weighted：' + str(f1_score(y_pred, test_label, average='weighted')))
 
 
 if __name__ == '__main__':

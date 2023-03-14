@@ -23,13 +23,13 @@ def seed_tensorflow(seed=2022):
 def data_loader():
 
     env1 = np.load('./dataset/experimental_v2/env.npy').astype(np.float32)
-    env2 = np.load('./dataset/experimental_v2/env.npy').astype(np.float32)
+    env2 = np.load('./dataset/synthetic_v2/env.npy').astype(np.float32)
     env = np.concatenate((env1, env2), axis=0)
     body1 = np.load('./dataset/experimental_v2/body.npy').astype(np.float32)
-    body2 = np.load('./dataset/experimental_v2/body.npy').astype(np.float32)
+    body2 = np.load('./dataset/synthetic_v2/body.npy').astype(np.float32)
     body = np.concatenate((body1, body2), axis=0)
     gender1 = np.load('./dataset/experimental_v2/gender.npy').astype(int)
-    gender2 = np.load('./dataset/experimental_v2/gender.npy').astype(int)
+    gender2 = np.load('./dataset/synthetic_v2/gender.npy').astype(int)
     gender = np.concatenate((gender1, gender2), axis=0)
 
 
@@ -42,7 +42,7 @@ def data_loader():
 
     # label
     y1 = np.load('./dataset/experimental_v2/label.npy').astype(int)
-    y2 = np.load('./dataset/experimental_v2/label.npy').astype(int)
+    y2 = np.load('./dataset/synthetic_v2/label.npy').astype(int)
     y = np.concatenate((y1, y2), axis=0)
 
     # split train test
@@ -182,9 +182,15 @@ def test():
     y_pred = model({'feature': test_feature}, training=False)
     y_pred = np.argmax(y_pred[0], axis=1)
     print('准确率：' + str(accuracy_score(y_pred, test_label)))
-    print('精确率：' + str(precision_score(y_pred, test_label)))
-    print('Recall：' + str(recall_score(y_pred, test_label)))
-    print('F1-score：' + str(f1_score(y_pred, test_label)))
+    print('精确率 macro：' + str(precision_score(y_pred, test_label, average='macro')))
+    print('精确率 micro：' + str(precision_score(y_pred, test_label, average='micro')))
+    print('精确率 weighted：' + str(precision_score(y_pred, test_label, average='weighted')))
+    print('Recall macro：' + str(recall_score(y_pred, test_label, average='macro')))
+    print('Recall micro：' + str(recall_score(y_pred, test_label, average='micro')))
+    print('Recall weighted：' + str(recall_score(y_pred, test_label, average='weighted')))
+    print('F1-score macro：' + str(f1_score(y_pred, test_label, average='macro')))
+    print('F1-score micro：' + str(f1_score(y_pred, test_label, average='micro')))
+    print('F1-score weighted：' + str(f1_score(y_pred, test_label, average='weighted')))
 
 
 if __name__ == '__main__':

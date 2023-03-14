@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     # 先用pandas读入csv
-    df = pd.read_csv('../../dataset/2021.csv', encoding='gbk').dropna(axis=0, how='any', inplace=False)
+    df = pd.read_csv('../../dataset/synthetic.csv', encoding='gbk').dropna(axis=0, how='any', inplace=False)
     data = df.loc[df['season'] == 'summer']
 
     '''environment data'''
@@ -46,9 +46,9 @@ if __name__ == '__main__':
     # y = data[y_feature]
 
     '''save data'''
-    np.save('../dataset/experimental_v2/env.npy', env_data)
-    np.save('../dataset/experimental_v2/gender.npy', gender)
-    np.save('../dataset/experimental_v2/body.npy', body)
-    np.save('../dataset/experimental_v2/label.npy', y)
+    np.save('../dataset/synthetic_v2/env.npy', env_data)
+    np.save('../dataset/synthetic_v2/gender.npy', gender)
+    np.save('../dataset/synthetic_v2/body.npy', body)
+    np.save('../dataset/synthetic_v2/label.npy', y)
 
 
